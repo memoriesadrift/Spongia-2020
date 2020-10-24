@@ -143,7 +143,10 @@ void setup_game()
 }
 
 // Player movement function
-void move_player();
+void move_player(UINT8 x, UINT8 y)
+{
+    move_game_object(&player, x, y);
+}
 
 // Jump function
 void jump();
@@ -168,14 +171,17 @@ int main()
                 jump();
             break;
         case J_LEFT:
-            move_player(/*params*/);
+            player.x += 2;        
+            move_player(player.x, player.y);
             break;
         case J_RIGHT:
-            move_player(/*params*/);
+            player.x += 2;
+            move_player(player.x, player.y);
             break;
         default:
             break;
         }
+        efficient_wait(3);
     }
 
     return 0;
