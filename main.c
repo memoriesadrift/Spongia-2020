@@ -49,32 +49,40 @@ void setup_player()
 // Function to move n x n tile game objects
 void move_game_object(struct GameObject* obj, UINT8 x, UINT8 y)
 {
+    // set new location in GameObject
+    obj->x = x;
+    obj->y = y;
     // top left / only sprite
-    move_sprite(obj->spriteids[0], x, y);
+    move_sprite(obj->spriteids[0], obj->x, obj->y);
     // FIXME: add constant size offset for sprites
     
     //bottom left sprite / top sprite of 16x8 sprites
     if (obj->height > 8)
     {
-        move_sprite(obj->spriteids[1], x, y + tileSize);
+        move_sprite(obj->spriteids[1], obj->x, obj->y + tileSize);
     }
 
     // top right sprite
     if (obj->width > 8)
     {
-        move_sprite(obj->spriteids[2], x + tileSize, y);
+        move_sprite(obj->spriteids[2], obj->x + tileSize, obj->y);
     }
 
     // bottom right sprite
     if (obj->width > 8 && obj->height > 8)
     {
-        move_sprite(obj->spriteids[3], x + tileSize, y + tileSize);
+        move_sprite(obj->spriteids[3], obj->x + tileSize, obj->y + tileSize);
     }
 }
 
 // function to scroll n x n tile game objects
 void scroll_game_object(struct GameObject* obj, INT8 movex, INT8 movey)
 {
+    // set new location in GameObject
+    obj->x += movex;
+    obj->y += movey;
+    // FIXME: Maybe make these update after every progress in the loop below?
+
     while(movex != 0 && movey != 0)
     {
         if(movex != 0){
@@ -146,6 +154,12 @@ void setup_game()
 void move_player(UINT8 x, UINT8 y)
 {
     move_game_object(&player, x, y);
+}
+
+// Player scroll function
+void scroll_player(INT8 x, INT8 y)
+{
+    scroll_game_object(&player, x, y);
 }
 
 // Jump function
