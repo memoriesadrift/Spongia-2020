@@ -10,7 +10,7 @@
   Compression          : None.
   Counter              : None.
   Tile size            : 8 x 8
-  Tiles                : 0 to 29
+  Tiles                : 0 to 23
 
   Palette colors       : None.
   SGB Palette          : None.
@@ -24,8 +24,8 @@
 
 
 /* Bank of tiles. */
-#define playerBank 0
+#define playerSpritesBank 0
 /* Start of tile array. */
 extern unsigned char playerSprites[];
 
-/* End of PLAYER.H */
+/* End of PLAYERSPRITES.H */

@@ -16,12 +16,14 @@ const UINT8 tileSize = 8; // FIXME: doesn't work as #define TILESIZE 8 in move_s
 struct GameObject 
 {
     UBYTE spriteids[4];
+    UINT8 spritenos[4];
     UINT8 x;
     UINT8 y;
     UINT8 width;
     UINT8 height;
     UINT8 animationLength;
-    UINT8 animationType; // 0 - idle, 1 - right, 2 - left 
+    UINT8 animationStep;
+    UINT8 animationType; // 0 - idle, 1 - right, 2 - left
 };
 
 // Player vars
@@ -44,12 +46,15 @@ void setup_player()
     player.width = 8;
     player.x = 80; // placeholder
     player.y = 72; // placeholder
-    player.animationLength = 5;
+    player.animationLength = 2;
     player.animationType = 0; // idle
+    player.animationStep = 0;
     player.spriteids[0] = 0;
     player.spriteids[1] = 1;
-    set_sprite_tile(0,0);
-    set_sprite_tile(1,1);
+    player.spritenos[0] = 0;
+    player.spritenos[1] = 1;
+    set_sprite_tile(player.spriteids[0], player.spritenos[0]);
+    set_sprite_tile(player.spriteids[1], player.spritenos[1]);
 }
 
 // Function to move n x n tile game objects
@@ -158,37 +163,37 @@ void scroll_player(INT8 x, INT8 y)
 }
 
 // player animate function
-void animate_player()
+void advance_player_animation()
 {
-    // TODO: generalise this function to animate_game_object()?
-    UINT8 i = 0;
-    for(i; i < player.animationLength; ++i)
-    {
-        player.spriteids[0] += 2;
-        player.spriteids[0] += 2;
-        set_sprite_tile(0, player.spriteids[0]);
-        set_sprite_tile(1, player.spriteids[1]);
-        wait_vbl_done();
-    }
-
+    ++player.animationStep;
     // Reset sprite to the starting point
-    switch (player.animationType)
+    if (player.animationStep > player.animationLength)
     {
-    case 0:
-        player.spriteids[0] = 0;
-        player.spriteids[0] = 1;
-        break;
-    case 1:
-        break;
-    case 2:
-        break;
-    default:
-        break;
+        // choose appropriate sprite id based on animation type
+        switch (player.animationType)
+        {
+        case 0:
+            player.spritenos[0] = 0;
+            player.spritenos[1] = 1;
+            break;
+        case 1:
+            break;
+        case 2:
+            break;
+        default:
+            break;
+        }
+        player.animationStep = 0;
+    } else
+    {
+        player.spritenos[0] += (UINT8)2;
+        player.spritenos[1] += (UINT8)2;
     }
-
-    set_sprite_tile(0, player.spriteids[0]);
-    set_sprite_tile(1, player.spriteids[1]);
+    
+    set_sprite_tile(player.spriteids[0], player.spritenos[0]);
+    set_sprite_tile(player.spriteids[1], player.spritenos[1]);
 }
+
 
 // Function to setup game
 // to be called at the beginning of main
@@ -240,8 +245,8 @@ int main()
         default:
             break;
         }
-        animate_player();
-        efficient_wait(2);
+        efficient_wait(10);
+        advance_player_animation();
     }
 
     return 0;
