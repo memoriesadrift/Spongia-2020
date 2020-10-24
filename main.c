@@ -20,6 +20,8 @@ struct GameObject
     UINT8 y;
     UINT8 width;
     UINT8 height;
+    UINT8 animationLength;
+    UINT8 animationType; // 0 - idle, 1 - right, 2 - left 
 };
 
 // Player vars
@@ -42,6 +44,8 @@ void setup_player()
     player.width = 8;
     player.x = 80; // placeholder
     player.y = 72; // placeholder
+    player.animationLength = 5;
+    player.animationType = 0; // idle
     player.spriteids[0] = 0;
     player.spriteids[1] = 1;
     set_sprite_tile(0,0);
@@ -153,6 +157,39 @@ void scroll_player(INT8 x, INT8 y)
     scroll_game_object(&player, x, y);
 }
 
+// player animate function
+void animate_player()
+{
+    // TODO: generalise this function to animate_game_object()?
+    UINT8 i = 0;
+    for(i; i < player.animationLength; ++i)
+    {
+        player.spriteids[0] += 2;
+        player.spriteids[0] += 2;
+        set_sprite_tile(0, player.spriteids[0]);
+        set_sprite_tile(1, player.spriteids[1]);
+        wait_vbl_done();
+    }
+
+    // Reset sprite to the starting point
+    switch (player.animationType)
+    {
+    case 0:
+        player.spriteids[0] = 0;
+        player.spriteids[0] = 1;
+        break;
+    case 1:
+        break;
+    case 2:
+        break;
+    default:
+        break;
+    }
+
+    set_sprite_tile(0, player.spriteids[0]);
+    set_sprite_tile(1, player.spriteids[1]);
+}
+
 // Function to setup game
 // to be called at the beginning of main
 // sets up bg, turns on display, etc.
@@ -202,7 +239,8 @@ int main()
         default:
             break;
         }
-        efficient_wait(3);
+        animate_player();
+        efficient_wait(2);
     }
 
     return 0;
