@@ -24,8 +24,9 @@ struct GameObject
     UINT8 height;
     UINT8 animationLength;
     UINT8 animationStep;
-    UINT8 animationType; // 0 - idle, 1 - right, 2 - left
+    UINT8 animationType; // 0 - idle, 1 - idle left, 2 - idle right, 3 - walk left, 4 - walk right
 };
+BYTE facing;
 
 // Player vars
 struct GameObject player;
@@ -162,6 +163,36 @@ void scroll_player(INT8 x, INT8 y)
     scroll_game_object(&player, x, y);
 }
 
+// function to change animation type dynamically
+void change_player_animation(UINT8 type)
+{
+    player.animationType = type;
+    // choose appropriate sprite id based on animation type
+    switch (player.animationType)
+        {
+        case 0:
+            player.spritenos[0] = 0;
+            player.spritenos[1] = 1;
+            break;
+        case 1:
+            player.spritenos[0] = 6;
+            player.spritenos[1] = 7;
+            break;
+        case 2:
+            break;
+        case 3:
+            player.spritenos[0] = 18;
+            player.spritenos[1] = 19;
+            break;
+        case 4:
+            player.spritenos[0] = 12;
+            player.spritenos[1] = 13;
+            break;
+        default:
+            break;
+        }
+}
+
 // player animate function
 void advance_player_animation()
 {
@@ -169,20 +200,7 @@ void advance_player_animation()
     // Reset sprite to the starting point
     if (player.animationStep > player.animationLength)
     {
-        // choose appropriate sprite id based on animation type
-        switch (player.animationType)
-        {
-        case 0:
-            player.spritenos[0] = 0;
-            player.spritenos[1] = 1;
-            break;
-        case 1:
-            break;
-        case 2:
-            break;
-        default:
-            break;
-        }
+        change_player_animation(player.animationType);
         player.animationStep = 0;
     } else
     {
@@ -237,11 +255,14 @@ int main()
                 jump();
             break;
         case J_LEFT:
-            player.x -= 2;        
+            player.x -= 2;
+            facing = -1;
             move_player(player.x, player.y);
             break;
         case J_RIGHT:
             player.x += 2;
+            facing = 1;
+            change_player_animation(2);
             move_player(player.x, player.y);
             break;
         default:
@@ -260,6 +281,25 @@ int main()
 
         // end of game tick, delay
         efficient_wait(5);
+
+        // after delay, determine animation based on keydown
+        // FIXME: walk animation never plays because it keeps restarting because of this. 
+        // FIXME: Is there a better way of doing this logic flow?
+        if(facing = -1 && (joypad() & J_LEFT))
+        {
+            change_player_animation(3);
+        } else if (facing = 1 && (joypad() & J_RIGHT)) 
+        {
+            change_player_animation(4);
+        } else if (facing = -1 && !(joypad() & J_LEFT))
+        {
+            change_player_animation(1);
+        } else if (facing = 1 && !(joypad() & J_RIGHT)) 
+        {
+            // not yet implemented, missing gfx
+            //change_player_animation(2)
+        }
+
     }
 
     return 0;
