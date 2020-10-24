@@ -66,7 +66,6 @@ void move_game_object(struct GameObject* obj, UINT8 x, UINT8 y)
     obj->y = y;
     // top left / only sprite
     move_sprite(obj->spriteids[0], obj->x, obj->y);
-    // FIXME: add constant size offset for sprites
     
     //bottom left sprite / top sprite of 16x8 sprites
     if (obj->height > 8)
