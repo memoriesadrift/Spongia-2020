@@ -122,7 +122,7 @@ void scroll_game_object(struct GameObject* obj, INT8 movex, INT8 movey)
             // bottom right sprite
             if (obj->width > 8 && obj->height > 8)
             {
-                scroll_sprite(obj->spriteids[3], 0, movex < 0 ? -1 : 1;
+                scroll_sprite(obj->spriteids[3], 0, movex < 0 ? -1 : 1);
             }
 
             movey += (movey < 0 ? 1 : -1);
@@ -136,6 +136,9 @@ void scroll_game_object(struct GameObject* obj, INT8 movex, INT8 movey)
 // sets up bg, turns on display, etc.
 void setup_game()
 {
+    DISPLAY_ON;
+    SHOW_SPRITES;
+    setup_player();
     gameRunning = 1;
 }
 
