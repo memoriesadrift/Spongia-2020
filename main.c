@@ -11,6 +11,7 @@ INT8 gravity; // FIXME: const?
 INT16 currentSpeedY;
 BYTE gameRunning;
 const UINT8 tileSize = 8; // FIXME: doesn't work as #define TILESIZE 8 in move_sprite() function call - why?
+UBYTE advanceAnimation; // player animation is 50% slower than game ticks, at the moment so we have to advance the animation every other tick
 
 // Bigger sprite supporting struct
 struct GameObject 
@@ -205,6 +206,7 @@ void setup_game()
     SHOW_SPRITES;
     DISPLAY_ON;
     gameRunning = 1;
+    advanceAnimation = 0;
 }
 
 
@@ -227,7 +229,8 @@ int main()
         {
             // fall
         }
-        
+
+        // joypad controls       
         switch (joypad())
         {
         case J_A:
@@ -235,7 +238,7 @@ int main()
                 jump();
             break;
         case J_LEFT:
-            player.x += 2;        
+            player.x -= 2;        
             move_player(player.x, player.y);
             break;
         case J_RIGHT:
@@ -245,8 +248,19 @@ int main()
         default:
             break;
         }
-        efficient_wait(10);
-        advance_player_animation();
+
+        // Animation
+        if(advanceAnimation)
+        {
+            advanceAnimation = 0;
+            advance_player_animation();
+        } else
+        {
+            advanceAnimation = 1;
+        }
+
+        // end of game tick, delay
+        efficient_wait(5);
     }
 
     return 0;
