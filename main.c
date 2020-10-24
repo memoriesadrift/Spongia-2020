@@ -1,6 +1,8 @@
 // Generic Includes
 #include <gb/gb.h>
 
+// Graphics
+#include "playerSprites.c"
 // TODO: Split generic functions into separate header files eventually?
 
 // Engine related variables
@@ -139,17 +141,6 @@ void scroll_game_object(struct GameObject* obj, INT8 movex, INT8 movey)
     }
 }
 
-// Function to setup game
-// to be called at the beginning of main
-// sets up bg, turns on display, etc.
-void setup_game()
-{
-    DISPLAY_ON;
-    SHOW_SPRITES;
-    setup_player();
-    gameRunning = 1;
-}
-
 // Player movement function
 void move_player(UINT8 x, UINT8 y)
 {
@@ -162,8 +153,24 @@ void scroll_player(INT8 x, INT8 y)
     scroll_game_object(&player, x, y);
 }
 
+// Function to setup game
+// to be called at the beginning of main
+// sets up bg, turns on display, etc.
+void setup_game()
+{
+    set_sprite_data(0, 30, playerSprites);
+    DISPLAY_ON;
+    SHOW_SPRITES;
+    setup_player();
+    gameRunning = 1;
+}
+
+
 // Jump function
-void jump();
+void jump()
+{
+
+}
 
 int main()
 {
