@@ -196,9 +196,9 @@ void animate_player()
 void setup_game()
 {
     set_sprite_data(0, 30, playerSprites);
-    DISPLAY_ON;
-    SHOW_SPRITES;
     setup_player();
+    SHOW_SPRITES;
+    DISPLAY_ON;
     gameRunning = 1;
 }
 
@@ -212,6 +212,7 @@ void jump()
 int main()
 {
     setup_game();
+    move_player(player.x, player.y);
 
     while(gameRunning)
     {
