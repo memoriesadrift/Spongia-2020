@@ -2,7 +2,9 @@
 #include <gb/gb.h>
 
 // Graphics
-#include "playerSprites.c"
+#include "gfx/playerSprites.c"
+#include "gfx/TestTileset.c"
+#include "gfx/TestMap.c"
 // TODO: Split generic functions into separate header files eventually?
 
 // Engine related variables
@@ -40,23 +42,6 @@ void efficient_wait(INT16 loops)
     {
         wait_vbl_done();
     }
-}
-
-void setup_player()
-{
-    player.height = 16;
-    player.width = 8;
-    player.x = 80; // placeholder
-    player.y = 72; // placeholder
-    player.animationLength = 2;
-    player.animationType = 0; // idle
-    player.animationStep = 0;
-    player.spriteids[0] = 0;
-    player.spriteids[1] = 1;
-    player.spritenos[0] = 0;
-    player.spritenos[1] = 1;
-    set_sprite_tile(player.spriteids[0], player.spritenos[0]);
-    set_sprite_tile(player.spriteids[1], player.spritenos[1]);
 }
 
 // Function to move n x n tile game objects
@@ -212,13 +197,29 @@ void advance_player_animation()
     set_sprite_tile(player.spriteids[1], player.spritenos[1]);
 }
 
+void setup_player()
+{
+    set_sprite_data(0, 30, playerSprites);
+    player.height = 16;
+    player.width = 8;
+    player.x = 80; // placeholder
+    player.y = 72; // placeholder
+    player.animationLength = 2;
+    player.animationType = 0; // idle
+    player.animationStep = 0;
+    player.spriteids[0] = 0;
+    player.spriteids[1] = 1;
+    player.spritenos[0] = 0;
+    player.spritenos[1] = 1;
+    set_sprite_tile(player.spriteids[0], player.spritenos[0]);
+    set_sprite_tile(player.spriteids[1], player.spritenos[1]);
+}
 
 // Function to setup game
 // to be called at the beginning of main
 // sets up bg, turns on display, etc.
 void setup_game()
 {
-    set_sprite_data(0, 30, playerSprites);
     setup_player();
     SHOW_SPRITES;
     DISPLAY_ON;
@@ -256,18 +257,25 @@ int main()
             break;
         case J_LEFT:
             player.x -= 2;
-            facing = -1;
-            move_player(player.x, player.y);
+            if (facing != -1)
+            {
+                facing = -1;
+                change_player_animation(3);
+            }
             break;
         case J_RIGHT:
             player.x += 2;
-            facing = 1;
-            change_player_animation(2);
-            move_player(player.x, player.y);
+            if (facing != 1)
+            {
+                facing = 1;
+                change_player_animation(4);
+            }
             break;
         default:
             break;
         }
+
+        move_player(player.x, player.y);
 
         // Animation
         if(advanceAnimation)
@@ -281,25 +289,6 @@ int main()
 
         // end of game tick, delay
         efficient_wait(5);
-
-        // after delay, determine animation based on keydown
-        // FIXME: walk animation never plays because it keeps restarting because of this. 
-        // FIXME: Is there a better way of doing this logic flow?
-        if(facing = -1 && (joypad() & J_LEFT))
-        {
-            change_player_animation(3);
-        } else if (facing = 1 && (joypad() & J_RIGHT)) 
-        {
-            change_player_animation(4);
-        } else if (facing = -1 && !(joypad() & J_LEFT))
-        {
-            change_player_animation(1);
-        } else if (facing = 1 && !(joypad() & J_RIGHT)) 
-        {
-            // not yet implemented, missing gfx
-            //change_player_animation(2)
-        }
-
     }
 
     return 0;
