@@ -300,7 +300,7 @@ INT8 detect_collision(UINT8 newx, UINT8 newy)
     tileindexTL = 20 * indexTLy + indexTLx;
 
     // detect the collision
-    if(currentTileSet[binary_search(currentTileSet, 0, (UINT8)(sizeof(currentTileSet)/sizeof(currentTileSet[0])), currentMap[tileindexTL])] < currentCollisionTileCutoff)
+    if(currentTileSet[binary_search(currentTileSet, 0u, (UINT8)(sizeof(currentTileSet)/sizeof(currentTileSet[0])), currentMap+tileindexTL)] < currentCollisionTileCutoff)
     {
         airborne = 0;
         return player.y + (indexTLy - player.y);
@@ -343,32 +343,29 @@ int main()
             // fall
         }
 
-        // joypad controls       
-        switch (joypad())
-        {
-        case J_A:
+
+        // joypad controls
+        UBYTE j = joypad();
+
+        if(j & J_A || airborne){ //FIXME: maybe this is suppossed to say (j & J_A && !airborne)
             if (!airborne)
                 jump();
-            break;
-        case J_LEFT:
-
+        }
+        if(j & J_LEFT){
             player.x -= 1;
             if (facing != -1)
             {
                 facing = -1;
                 change_player_animation(2);
             }
-            break;
-        case J_RIGHT:
+        }
+        if(j & J_RIGHT){
             player.x += 1;
             if (facing != 1)
             {
                 facing = 1;
                 change_player_animation(3);
             }
-            break;
-        default:
-            break;
         }
 
         move_player(player.x, player.y);
