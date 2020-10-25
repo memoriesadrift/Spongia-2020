@@ -1,3 +1,6 @@
+// FIXME: Sprite centered around top left pixel of head, make it center on bottom left of feet
+// FIXME: Fine tune collision detection after ^ is finished. Twiddle with the return value of the collision detection
+
 // Generic Includes
 #include <gb/gb.h>
 
@@ -51,7 +54,7 @@ void efficient_wait(INT16 loops)
 // A recursive binary search function. It returns 
 // location of x in given array arr[l..r] is present, 
 // otherwise -1 
-int binary_search(char* arr[], UINT8 l, UINT8 r, char* x) 
+BYTE binary_search(unsigned char* arr, UINT8 l, UINT8 r, unsigned char x) 
 { 
     if (r >= l) { 
         UINT8 mid = l + (r - l) / 2; 
@@ -299,11 +302,9 @@ INT8 detect_collision(UINT8 newx, UINT8 newy)
     indexTLy = (newy - 16) / 8;
     tileindexTL = 20 * indexTLy + indexTLx;
 
-    // detect the collision
-    if(currentTileSet[binary_search(currentTileSet, 0u, (UINT8)(sizeof(currentTileSet)/sizeof(currentTileSet[0])), currentMap+tileindexTL)] < currentCollisionTileCutoff)
-    {
+    if ((UBYTE) currentMap[tileindexTL] < 7u){
         airborne = 0;
-        return player.y + (indexTLy - player.y);
+        return (indexTLy*8u - 16u);
     }
 
     return newy;
@@ -313,7 +314,6 @@ INT8 detect_collision(UINT8 newx, UINT8 newy)
 // Jump function
 void jump()
 {
-    INT8 possibleSurfaceY;
     if(airborne==0)
     {
         airborne=1;
@@ -321,12 +321,11 @@ void jump()
     }
 
     currentSpeedY = currentSpeedY + gravity;
+    if (currentSpeedY < -7) currentSpeedY = -7;
 
     player.y = player.y - currentSpeedY;
 
-    possibleSurfaceY = detect_collision(player.x, player.y);
-
-    player.y = possibleSurfaceY;
+    player.y = detect_collision(player.x, player.y);
 }
 
 int main()
@@ -347,7 +346,7 @@ int main()
         // joypad controls
         UBYTE j = joypad();
 
-        if(j & J_A && !airborne){ //FIXME: I am not sure I did this right!!!
+        if((j & J_A && !airborne) || airborne){ //FIXME: I am not sure I did this right!!!
             jump();
         }
         if(j & J_LEFT){
