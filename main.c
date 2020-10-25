@@ -2,16 +2,18 @@
 #include <gb/gb.h>
 
 // Graphics
-#include "playerSprites.c"
+#include "gfx/playerSprites.c"
+#include "gfx/TestTileset.c"
+#include "gfx/TestMap.c"
 // TODO: Split generic functions into separate header files eventually?
 
 // Engine related variables
-BYTE airborne;
-INT8 gravity; // FIXME: const?
-INT16 currentSpeedY;
 BYTE gameRunning;
 const UINT8 tileSize = 8; // FIXME: doesn't work as #define TILESIZE 8 in move_sprite() function call - why?
 UBYTE advanceAnimation; // player animation is 50% slower than game ticks, at the moment so we have to advance the animation every other tick
+char* currentMap;
+char* currentTileSet;
+UINT8 currentCollisionTileCutoff;
 
 // Bigger sprite supporting struct
 struct GameObject 
@@ -22,11 +24,15 @@ struct GameObject
     UINT8 y;
     UINT8 width;
     UINT8 height;
-    UINT8 animationLength;
+    UINT8 animationLength; // 1 - 2 frames, 2 - 3 frames
     UINT8 animationStep;
-    UINT8 animationType; // 0 - idle, 1 - idle left, 2 - idle right, 3 - walk left, 4 - walk right
+    UINT8 animationType; //0 - idle left, 1 - idle right, 2 - walk left, 3 - walk right, 4 - jump left, 5 - jump right 
+    // TODO: introduce constants for player animation types and lengths
 };
 BYTE facing;
+BYTE airborne;
+INT8 gravity; // FIXME: const?
+INT16 currentSpeedY;
 
 // Player vars
 struct GameObject player;
@@ -42,22 +48,33 @@ void efficient_wait(INT16 loops)
     }
 }
 
-void setup_player()
-{
-    player.height = 16;
-    player.width = 8;
-    player.x = 80; // placeholder
-    player.y = 72; // placeholder
-    player.animationLength = 2;
-    player.animationType = 0; // idle
-    player.animationStep = 0;
-    player.spriteids[0] = 0;
-    player.spriteids[1] = 1;
-    player.spritenos[0] = 0;
-    player.spritenos[1] = 1;
-    set_sprite_tile(player.spriteids[0], player.spritenos[0]);
-    set_sprite_tile(player.spriteids[1], player.spritenos[1]);
-}
+// A recursive binary search function. It returns 
+// location of x in given array arr[l..r] is present, 
+// otherwise -1 
+int binary_search(char* arr[], UINT8 l, UINT8 r, char* x) 
+{ 
+    if (r >= l) { 
+        UINT8 mid = l + (r - l) / 2; 
+  
+        // If the element is present at the middle 
+        // itself 
+        if (arr[mid] == x) 
+            return mid; 
+  
+        // If element is smaller than mid, then 
+        // it can only be present in left subarray 
+        if (arr[mid] > x) 
+            return binary_search(arr, l, mid - 1, x); 
+  
+        // Else the element can only be present 
+        // in right subarray 
+        return binary_search(arr, mid + 1, r, x); 
+    } 
+  
+    // We reach here when element is not 
+    // present in array 
+    return -1; 
+} 
 
 // Function to move n x n tile game objects
 void move_game_object(struct GameObject* obj, UINT8 x, UINT8 y)
@@ -171,26 +188,47 @@ void change_player_animation(UINT8 type)
     switch (player.animationType)
         {
         case 0:
-            player.spritenos[0] = 0;
-            player.spritenos[1] = 1;
-            break;
-        case 1:
+            // idle left
             player.spritenos[0] = 6;
             player.spritenos[1] = 7;
             break;
-        case 2:
+        case 1:
+            // idle right
+            player.spritenos[0] = 0;
+            player.spritenos[1] = 1;
             break;
-        case 3:
+        case 2:
+            // walk left
             player.spritenos[0] = 18;
             player.spritenos[1] = 19;
             break;
-        case 4:
+        case 3:
+            // walk right
             player.spritenos[0] = 12;
             player.spritenos[1] = 13;
             break;
+        case 4:
+            // jump left
+            // warning, this animation is 2 frames not 3!
+            player.spritenos[0] = 28;
+            player.spritenos[1] = 29;
+        case 5:
+            // jump right
+            // warning, this animation is 2 frames not 3!
+            player.spritenos[0] = 24;
+            player.spritenos[1] = 25;
         default:
             break;
         }
+    // change the player's animation length according to what's going on
+    if (player.animationType > 3)
+    {
+        player.animationLength = 1;
+    } else
+    {
+        player.animationLength = 2;
+    }
+    
 }
 
 // player animate function
@@ -212,25 +250,83 @@ void advance_player_animation()
     set_sprite_tile(player.spriteids[1], player.spritenos[1]);
 }
 
+void setup_player()
+{
+    set_sprite_data(0, 31, playerSprites);
+    player.height = 16;
+    player.width = 8;
+    player.x = 8; // placeholder
+    player.y = 96; // placeholder
+    player.animationLength = 2;
+    player.animationType = 0; // idle
+    player.animationStep = 0;
+    player.spriteids[0] = 0;
+    player.spriteids[1] = 1;
+    player.spritenos[0] = 0;
+    player.spritenos[1] = 1;
+    set_sprite_tile(player.spriteids[0], player.spritenos[0]);
+    set_sprite_tile(player.spriteids[1], player.spritenos[1]);
+    airborne = 0;
+}
 
 // Function to setup game
 // to be called at the beginning of main
 // sets up bg, turns on display, etc.
 void setup_game()
 {
-    set_sprite_data(0, 30, playerSprites);
     setup_player();
+    set_bkg_data(0, 46, TestTileset);
+    set_bkg_tiles(0, 0, 20, 18, TestMap);
+    currentMap = TestMap;
+    currentTileSet = TestTileset;
+    currentCollisionTileCutoff = 7;
     SHOW_SPRITES;
+    SHOW_BKG;
     DISPLAY_ON;
+    gravity = -2;
     gameRunning = 1;
     advanceAnimation = 0;
+}
+
+// collision detection
+INT8 detect_collision(UINT8 newx, UINT8 newy)
+{
+    UINT16 indexTLx, indexTLy, tileindexTL;
+    BYTE result;
+    UINT8 tile;
+
+    indexTLx = (newx - 8) / 8;
+    indexTLy = (newy - 16) / 8;
+    tileindexTL = 20 * indexTLy + indexTLx;
+
+    // detect the collision
+    if(currentTileSet[binary_search(currentTileSet, 0, (UINT8)(sizeof(currentTileSet)/sizeof(currentTileSet[0])), currentMap[tileindexTL])] < currentCollisionTileCutoff)
+    {
+        airborne = 0;
+        return player.y + (indexTLy - player.y);
+    }
+
+    return newy;
 }
 
 
 // Jump function
 void jump()
 {
+    INT8 possibleSurfaceY;
+    if(airborne==0)
+    {
+        airborne=1;
+        currentSpeedY = 10;
+    }
 
+    currentSpeedY = currentSpeedY + gravity;
+
+    player.y = player.y - currentSpeedY;
+
+    possibleSurfaceY = detect_collision(player.x, player.y);
+
+    player.y = possibleSurfaceY;
 }
 
 int main()
@@ -256,18 +352,25 @@ int main()
             break;
         case J_LEFT:
             player.x -= 1;
-            facing = -1;
-            move_player(player.x, player.y);
+            if (facing != -1)
+            {
+                facing = -1;
+                change_player_animation(2);
+            }
             break;
         case J_RIGHT:
             player.x += 1;
-            facing = 1;
-            change_player_animation(2);
-            move_player(player.x, player.y);
+            if (facing != 1)
+            {
+                facing = 1;
+                change_player_animation(3);
+            }
             break;
         default:
             break;
         }
+
+        move_player(player.x, player.y);
 
         // Animation
         if(advanceAnimation == 2)
@@ -281,24 +384,6 @@ int main()
 
         // end of game tick, delay
         efficient_wait(2);
-
-        // after delay, determine animation based on keydown
-        // FIXME: walk animation never plays because it keeps restarting because of this. 
-        // FIXME: Is there a better way of doing this logic flow?
-        if(facing = -1 && (joypad() & J_LEFT))
-        {
-            change_player_animation(3);
-        } else if (facing = 1 && (joypad() & J_RIGHT)) 
-        {
-            change_player_animation(4);
-        } else if (facing = -1 && !(joypad() & J_LEFT))
-        {
-            change_player_animation(1);
-        } else if (facing = 1 && !(joypad() & J_RIGHT)) 
-        {
-            // not yet implemented, missing gfx
-            //change_player_animation(2)
-        }
 
     }
 
