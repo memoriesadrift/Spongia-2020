@@ -255,12 +255,12 @@ int main()
                 jump();
             break;
         case J_LEFT:
-            player.x -= 2;
+            player.x -= 1;
             facing = -1;
             move_player(player.x, player.y);
             break;
         case J_RIGHT:
-            player.x += 2;
+            player.x += 1;
             facing = 1;
             change_player_animation(2);
             move_player(player.x, player.y);
@@ -270,17 +270,17 @@ int main()
         }
 
         // Animation
-        if(advanceAnimation)
+        if(advanceAnimation == 2)
         {
             advanceAnimation = 0;
             advance_player_animation();
         } else
         {
-            advanceAnimation = 1;
+            ++advanceAnimation;
         }
 
         // end of game tick, delay
-        efficient_wait(5);
+        efficient_wait(2);
 
         // after delay, determine animation based on keydown
         // FIXME: walk animation never plays because it keeps restarting because of this. 
