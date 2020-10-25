@@ -347,9 +347,8 @@ int main()
         // joypad controls
         UBYTE j = joypad();
 
-        if(j & J_A || airborne){ //FIXME: maybe this is suppossed to say (j & J_A && !airborne)
-            if (!airborne)
-                jump();
+        if(j & J_A && !airborne){ //FIXME: I am not sure I did this right!!!
+            jump();
         }
         if(j & J_LEFT){
             player.x -= 1;
