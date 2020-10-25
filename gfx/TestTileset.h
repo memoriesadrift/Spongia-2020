@@ -1,6 +1,6 @@
 /*
 
- PLAYERSPRITES.H
+ TESTTILESET.H
 
  Include File.
 
@@ -10,7 +10,7 @@
   Compression          : None.
   Counter              : None.
   Tile size            : 8 x 8
-  Tiles                : 0 to 23
+  Tiles                : 0 to 45
 
   Palette colors       : None.
   SGB Palette          : None.
@@ -24,8 +24,8 @@
 
 
 /* Bank of tiles. */
-#define playerSpritesBank 0
+#define TestTilesetBank 0
 /* Start of tile array. */
-extern unsigned char playerSprites[];
+extern unsigned char TestTileset[];
 
-/* End of PLAYERSPRITES.H */
+/* End of TESTTILESET.H */
