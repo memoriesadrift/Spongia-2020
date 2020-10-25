@@ -51,7 +51,7 @@ void efficient_wait(INT16 loops)
 // A recursive binary search function. It returns 
 // location of x in given array arr[l..r] is present, 
 // otherwise -1 
-int binary_search(char* arr[], UINT8 l, UINT8 r, char* x) 
+BYTE binary_search(unsigned char* arr, UINT8 l, UINT8 r, unsigned char x) 
 { 
     if (r >= l) { 
         UINT8 mid = l + (r - l) / 2; 
@@ -296,15 +296,48 @@ INT8 detect_collision(UINT8 newx, UINT8 newy)
     UINT8 tile;
 
     indexTLx = (newx - 8) / 8;
+    *((UINT16*)0xC030) = indexTLx;
     indexTLy = (newy - 16) / 8;
+    *((UINT16*)0xC032) = indexTLy;
     tileindexTL = 20 * indexTLy + indexTLx;
 
     // detect the collision
-    if(currentTileSet[binary_search(currentTileSet, 0u, (UINT8)(sizeof(currentTileSet)/sizeof(currentTileSet[0])), currentMap+tileindexTL)] < currentCollisionTileCutoff)
+
+    //BYTE pos = binary_search(currentTileSet, 0u, /*(UINT8)(sizeof(currentTileSet)/sizeof(currentTileSet[0]))*/ 46u, currentMap[tileindexTL]);
+
+    
+/*
+    BYTE pos = -1;
+    for (BYTE i = 0; i < 46; ++i){
+        if (currentTileSet[i] == currentMap[tileindexTL]){
+            pos = i;
+            break;
+        }
+    }
+
+    *((BYTE*)0xC034) = pos;
+    *((char*)0xC036) = currentMap[tileindexTL];
+    *((UINT8*)0xC038) = (UINT8)(sizeof(currentTileSet)/sizeof(currentTileSet[0]));
+    //if(pos == -1){
+        waitpad(0xFF);
+        waitpadup();
+    //}
+    
+    if(pos != -1  && (UBYTE)currentTileSet[pos] < currentCollisionTileCutoff)
     {
         airborne = 0;
         return player.y + (indexTLy - player.y);
+    }*/
+
+    *((BYTE*)0xC034) = 0;
+    *((UBYTE*)0xC036) = (UBYTE)currentMap[tileindexTL];
+    if ((UBYTE) currentMap[tileindexTL] < 7u){
+        *((BYTE*)0xC034) = 1;
+        airborne = 0;
+        return player.y + (indexTLy*8u - 16u);
     }
+    //waitpad(0xFF);
+    //waitpadup();
 
     return newy;
 }
@@ -321,6 +354,7 @@ void jump()
     }
 
     currentSpeedY = currentSpeedY + gravity;
+    if (currentSpeedY < -7) currentSpeedY = -7;
 
     player.y = player.y - currentSpeedY;
 
@@ -347,7 +381,7 @@ int main()
         // joypad controls
         UBYTE j = joypad();
 
-        if(j & J_A && !airborne){ //FIXME: I am not sure I did this right!!!
+        if((j & J_A && !airborne) || airborne){ //FIXME: I am not sure I did this right!!!
             jump();
         }
         if(j & J_LEFT){
