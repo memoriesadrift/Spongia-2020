@@ -8,12 +8,12 @@
 // TODO: Split generic functions into separate header files eventually?
 
 // Engine related variables
-BYTE airborne;
-INT8 gravity; // FIXME: const?
-INT16 currentSpeedY;
 BYTE gameRunning;
 const UINT8 tileSize = 8; // FIXME: doesn't work as #define TILESIZE 8 in move_sprite() function call - why?
 UBYTE advanceAnimation; // player animation is 50% slower than game ticks, at the moment so we have to advance the animation every other tick
+char* currentMap;
+char* currentTileSet;
+UINT8 currentCollisionTileCutoff;
 
 // Bigger sprite supporting struct
 struct GameObject 
@@ -24,11 +24,15 @@ struct GameObject
     UINT8 y;
     UINT8 width;
     UINT8 height;
-    UINT8 animationLength;
+    UINT8 animationLength; // 1 - 2 frames, 2 - 3 frames
     UINT8 animationStep;
-    UINT8 animationType; //0 - idle left, 1 - idle right, 2 - walk left, 3 - walk right, 4 - jump left, 5 - jump right
+    UINT8 animationType; //0 - idle left, 1 - idle right, 2 - walk left, 3 - walk right, 4 - jump left, 5 - jump right 
+    // TODO: introduce constants for player animation types and lengths
 };
 BYTE facing;
+BYTE airborne;
+INT8 gravity; // FIXME: const?
+INT16 currentSpeedY;
 
 // Player vars
 struct GameObject player;
@@ -43,6 +47,34 @@ void efficient_wait(INT16 loops)
         wait_vbl_done();
     }
 }
+
+// A recursive binary search function. It returns 
+// location of x in given array arr[l..r] is present, 
+// otherwise -1 
+int binary_search(char* arr[], UINT8 l, UINT8 r, char* x) 
+{ 
+    if (r >= l) { 
+        UINT8 mid = l + (r - l) / 2; 
+  
+        // If the element is present at the middle 
+        // itself 
+        if (arr[mid] == x) 
+            return mid; 
+  
+        // If element is smaller than mid, then 
+        // it can only be present in left subarray 
+        if (arr[mid] > x) 
+            return binary_search(arr, l, mid - 1, x); 
+  
+        // Else the element can only be present 
+        // in right subarray 
+        return binary_search(arr, mid + 1, r, x); 
+    } 
+  
+    // We reach here when element is not 
+    // present in array 
+    return -1; 
+} 
 
 // Function to move n x n tile game objects
 void move_game_object(struct GameObject* obj, UINT8 x, UINT8 y)
@@ -223,8 +255,8 @@ void setup_player()
     set_sprite_data(0, 31, playerSprites);
     player.height = 16;
     player.width = 8;
-    player.x = 80; // placeholder
-    player.y = 72; // placeholder
+    player.x = 8; // placeholder
+    player.y = 96; // placeholder
     player.animationLength = 2;
     player.animationType = 0; // idle
     player.animationStep = 0;
@@ -234,6 +266,7 @@ void setup_player()
     player.spritenos[1] = 1;
     set_sprite_tile(player.spriteids[0], player.spritenos[0]);
     set_sprite_tile(player.spriteids[1], player.spritenos[1]);
+    airborne = 0;
 }
 
 // Function to setup game
@@ -242,17 +275,58 @@ void setup_player()
 void setup_game()
 {
     setup_player();
+    set_bkg_data(0, 46, TestTileset);
+    set_bkg_tiles(0, 0, 20, 18, TestMap);
+    currentMap = TestMap;
+    currentTileSet = TestTileset;
+    currentCollisionTileCutoff = 7;
     SHOW_SPRITES;
+    SHOW_BKG;
     DISPLAY_ON;
+    gravity = -2;
     gameRunning = 1;
     advanceAnimation = 0;
+}
+
+// collision detection
+INT8 detect_collision(UINT8 newx, UINT8 newy)
+{
+    UINT16 indexTLx, indexTLy, tileindexTL;
+    BYTE result;
+    UINT8 tile;
+
+    indexTLx = (newx - 8) / 8;
+    indexTLy = (newy - 16) / 8;
+    tileindexTL = 20 * indexTLy + indexTLx;
+
+    // detect the collision
+    if(currentTileSet[binary_search(currentTileSet, 0, (UINT8)(sizeof(currentTileSet)/sizeof(currentTileSet[0])), currentMap[tileindexTL])] < currentCollisionTileCutoff)
+    {
+        airborne = 0;
+        return player.y + (indexTLy - player.y);
+    }
+
+    return newy;
 }
 
 
 // Jump function
 void jump()
 {
-    
+    INT8 possibleSurfaceY;
+    if(airborne==0)
+    {
+        airborne=1;
+        currentSpeedY = 10;
+    }
+
+    currentSpeedY = currentSpeedY + gravity;
+
+    player.y = player.y - currentSpeedY;
+
+    possibleSurfaceY = detect_collision(player.x, player.y);
+
+    player.y = possibleSurfaceY;
 }
 
 int main()
@@ -281,7 +355,7 @@ int main()
             if (facing != -1)
             {
                 facing = -1;
-                change_player_animation(3);
+                change_player_animation(2);
             }
             break;
         case J_RIGHT:
@@ -289,7 +363,7 @@ int main()
             if (facing != 1)
             {
                 facing = 1;
-                change_player_animation(4);
+                change_player_animation(3);
             }
             break;
         default:
