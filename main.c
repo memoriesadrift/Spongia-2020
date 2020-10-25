@@ -1,3 +1,6 @@
+// FIXME: Sprite centered around top left pixel of head, make it center on bottom left of feet
+// FIXME: Fine tune collision detection after ^ is finished. Twiddle with the return value of the collision detection
+
 // Generic Includes
 #include <gb/gb.h>
 
@@ -296,48 +299,13 @@ INT8 detect_collision(UINT8 newx, UINT8 newy)
     UINT8 tile;
 
     indexTLx = (newx - 8) / 8;
-    *((UINT16*)0xC030) = indexTLx;
     indexTLy = (newy - 16) / 8;
-    *((UINT16*)0xC032) = indexTLy;
     tileindexTL = 20 * indexTLy + indexTLx;
 
-    // detect the collision
-
-    //BYTE pos = binary_search(currentTileSet, 0u, /*(UINT8)(sizeof(currentTileSet)/sizeof(currentTileSet[0]))*/ 46u, currentMap[tileindexTL]);
-
-    
-/*
-    BYTE pos = -1;
-    for (BYTE i = 0; i < 46; ++i){
-        if (currentTileSet[i] == currentMap[tileindexTL]){
-            pos = i;
-            break;
-        }
-    }
-
-    *((BYTE*)0xC034) = pos;
-    *((char*)0xC036) = currentMap[tileindexTL];
-    *((UINT8*)0xC038) = (UINT8)(sizeof(currentTileSet)/sizeof(currentTileSet[0]));
-    //if(pos == -1){
-        waitpad(0xFF);
-        waitpadup();
-    //}
-    
-    if(pos != -1  && (UBYTE)currentTileSet[pos] < currentCollisionTileCutoff)
-    {
-        airborne = 0;
-        return player.y + (indexTLy - player.y);
-    }*/
-
-    *((BYTE*)0xC034) = 0;
-    *((UBYTE*)0xC036) = (UBYTE)currentMap[tileindexTL];
     if ((UBYTE) currentMap[tileindexTL] < 7u){
-        *((BYTE*)0xC034) = 1;
         airborne = 0;
-        return player.y + (indexTLy*8u - 16u);
+        return (indexTLy*8u - 16u);
     }
-    //waitpad(0xFF);
-    //waitpadup();
 
     return newy;
 }
@@ -346,7 +314,6 @@ INT8 detect_collision(UINT8 newx, UINT8 newy)
 // Jump function
 void jump()
 {
-    INT8 possibleSurfaceY;
     if(airborne==0)
     {
         airborne=1;
@@ -358,9 +325,7 @@ void jump()
 
     player.y = player.y - currentSpeedY;
 
-    possibleSurfaceY = detect_collision(player.x, player.y);
-
-    player.y = possibleSurfaceY;
+    player.y = detect_collision(player.x, player.y);
 }
 
 int main()
