@@ -26,7 +26,7 @@ struct GameObject
     UINT8 height;
     UINT8 animationLength;
     UINT8 animationStep;
-    UINT8 animationType; // 0 - idle, 1 - idle left, 2 - idle right, 3 - walk left, 4 - walk right
+    UINT8 animationType; //0 - idle left, 1 - idle right, 2 - walk left, 3 - walk right, 4 - jump left, 5 - jump right
 };
 BYTE facing;
 
@@ -156,26 +156,47 @@ void change_player_animation(UINT8 type)
     switch (player.animationType)
         {
         case 0:
-            player.spritenos[0] = 0;
-            player.spritenos[1] = 1;
-            break;
-        case 1:
+            // idle left
             player.spritenos[0] = 6;
             player.spritenos[1] = 7;
             break;
-        case 2:
+        case 1:
+            // idle right
+            player.spritenos[0] = 0;
+            player.spritenos[1] = 1;
             break;
-        case 3:
+        case 2:
+            // walk left
             player.spritenos[0] = 18;
             player.spritenos[1] = 19;
             break;
-        case 4:
+        case 3:
+            // walk right
             player.spritenos[0] = 12;
             player.spritenos[1] = 13;
             break;
+        case 4:
+            // jump left
+            // warning, this animation is 2 frames not 3!
+            player.spritenos[0] = 28;
+            player.spritenos[1] = 29;
+        case 5:
+            // jump right
+            // warning, this animation is 2 frames not 3!
+            player.spritenos[0] = 24;
+            player.spritenos[1] = 25;
         default:
             break;
         }
+    // change the player's animation length according to what's going on
+    if (player.animationType > 3)
+    {
+        player.animationLength = 1;
+    } else
+    {
+        player.animationLength = 2;
+    }
+    
 }
 
 // player animate function
@@ -199,7 +220,7 @@ void advance_player_animation()
 
 void setup_player()
 {
-    set_sprite_data(0, 30, playerSprites);
+    set_sprite_data(0, 31, playerSprites);
     player.height = 16;
     player.width = 8;
     player.x = 80; // placeholder
@@ -231,7 +252,7 @@ void setup_game()
 // Jump function
 void jump()
 {
-
+    
 }
 
 int main()
