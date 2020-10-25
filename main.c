@@ -1,5 +1,7 @@
 // FIXME: Sprite centered around top left pixel of head, make it center on bottom left of feet
 // FIXME: Fine tune collision detection after ^ is finished. Twiddle with the return value of the collision detection
+// TODO: add jumping animation!
+// TODO: add "standing facing left/right" animation - detection for if player is currently moving or not
 
 // Generic Includes
 #include <gb/gb.h>
@@ -144,7 +146,7 @@ void scroll_game_object(struct GameObject* obj, INT8 movex, INT8 movey)
         }
 
         if(movey != 0){
-                    // top left / only sprite
+            // top left / only sprite
             scroll_sprite(obj->spriteids[0], 0, movex < 0 ? -1 : 1);
             
             //bottom left sprite / top sprite of 16x8 sprites
