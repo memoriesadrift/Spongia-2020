@@ -1,5 +1,7 @@
-// FIXME: Sprite centered around top left pixel of head, make it center on bottom left of feet
-// FIXME: Fine tune collision detection after ^ is finished. Twiddle with the return value of the collision detection
+// FIXME: x-axis collision, currently, if the player walks into a block from the side, it won't count as a collision
+// TODO: smooth out falling, it happens too fast, possibly due to fall() being called twice? see comment in main()
+// TODO: add jumping animation!
+// TODO: add "standing facing left/right" animation - detection for if player is currently moving or not
 
 // Generic Includes
 #include <gb/gb.h>
@@ -144,7 +146,7 @@ void scroll_game_object(struct GameObject* obj, INT8 movex, INT8 movey)
         }
 
         if(movey != 0){
-                    // top left / only sprite
+            // top left / only sprite
             scroll_sprite(obj->spriteids[0], 0, movex < 0 ? -1 : 1);
             
             //bottom left sprite / top sprite of 16x8 sprites
@@ -292,6 +294,7 @@ void setup_game()
 }
 
 // collision detection
+// WARNING: Sprite is tracked by its top left corner, this function checks collisions with the BOTTOM LEFT
 INT8 detect_collision(UINT8 newx, UINT8 newy)
 {
     UINT16 indexTLx, indexTLy, tileindexTL;
@@ -299,17 +302,26 @@ INT8 detect_collision(UINT8 newx, UINT8 newy)
     UINT8 tile;
 
     indexTLx = (newx - 8) / 8;
-    indexTLy = (newy - 16) / 8;
+    indexTLy = (newy) / 8; // ney-16 for the TOP LEFT of sprite
     tileindexTL = 20 * indexTLy + indexTLx;
 
     if ((UBYTE) currentMap[tileindexTL] < 7u){
         airborne = 0;
-        return (indexTLy*8u - 16u);
+        return (indexTLy*8u); // -16u for the TOP LEFT of sprite
     }
 
     return newy;
 }
 
+// Function for falling
+void fall()
+{
+    currentSpeedY = currentSpeedY + gravity;
+    if (currentSpeedY < -7) currentSpeedY = -7;
+
+    player.y = player.y - currentSpeedY;
+    player.y = detect_collision(player.x, player.y);
+}
 
 // Jump function
 void jump()
@@ -320,13 +332,9 @@ void jump()
         currentSpeedY = 10;
     }
 
-    currentSpeedY = currentSpeedY + gravity;
-    if (currentSpeedY < -7) currentSpeedY = -7;
-
-    player.y = player.y - currentSpeedY;
-
-    player.y = detect_collision(player.x, player.y);
+    fall();
 }
+
 
 int main()
 {
@@ -366,11 +374,14 @@ int main()
             }
         }
 
+        
         move_player(player.x, player.y);
 
         // Animation
         if(advanceAnimation == 2)
         {
+            fall(); // fall called only every few game ticks, because falling and jumping was extremely fast otherwise
+                    // this can probably be fixed some way and someone should do it
             advanceAnimation = 0;
             advance_player_animation();
         } else
