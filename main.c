@@ -1,5 +1,5 @@
-// FIXME: Sprite centered around top left pixel of head, make it center on bottom left of feet
-// FIXME: Fine tune collision detection after ^ is finished. Twiddle with the return value of the collision detection
+// FIXME: x-axis collision, currently, if the player walks into a block from the side, it won't count as a collision
+// TODO: smooth out falling, it happens too fast, possibly due to fall() being called twice? see comment in main()
 // TODO: add jumping animation!
 // TODO: add "standing facing left/right" animation - detection for if player is currently moving or not
 
@@ -380,7 +380,8 @@ int main()
         // Animation
         if(advanceAnimation == 2)
         {
-            fall();
+            fall(); // fall called only every few game ticks, because falling and jumping was extremely fast otherwise
+                    // this can probably be fixed some way and someone should do it
             advanceAnimation = 0;
             advance_player_animation();
         } else
