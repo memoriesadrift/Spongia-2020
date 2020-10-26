@@ -294,6 +294,7 @@ void setup_game()
 }
 
 // collision detection
+// WARNING: Sprite is tracked by its top left corner, this function checks collisions with the BOTTOM LEFT
 INT8 detect_collision(UINT8 newx, UINT8 newy)
 {
     UINT16 indexTLx, indexTLy, tileindexTL;
@@ -301,12 +302,12 @@ INT8 detect_collision(UINT8 newx, UINT8 newy)
     UINT8 tile;
 
     indexTLx = (newx - 8) / 8;
-    indexTLy = (newy - 16) / 8;
+    indexTLy = (newy) / 8; // ney-16 for the TOP LEFT of sprite
     tileindexTL = 20 * indexTLy + indexTLx;
 
     if ((UBYTE) currentMap[tileindexTL] < 7u){
         airborne = 0;
-        return (indexTLy*8u - 16u);
+        return (indexTLy*8u); // -16u for the TOP LEFT of sprite
     }
 
     return newy;
