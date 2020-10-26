@@ -298,14 +298,12 @@ void setup_game()
 INT8 detect_collision(UINT8 newx, UINT8 newy)
 {
     UINT16 indexTLx, indexTLy, tileindexTL;
-    BYTE result;
-    UINT8 tile;
 
     indexTLx = (newx - 8) / 8;
     indexTLy = (newy) / 8; // ney-16 for the TOP LEFT of sprite
     tileindexTL = 20 * indexTLy + indexTLx;
 
-    if ((UBYTE) currentMap[tileindexTL] < 7u){
+    if ((UBYTE) currentMap[tileindexTL] < COLLISION_CUTOFF_TEST_MAP){
         airborne = 0;
         return (indexTLy*8u); // -16u for the TOP LEFT of sprite
     }

@@ -8,7 +8,7 @@
    Section       : 
    Bank          : 0
    Map size      : 20 x 18
-   Tile set      : E:\Dokumenty\Škola\Spongia2020\tilesets\TestTileset.gbr
+   Tile set      : E:\Dokumenty\ï¿½kola\Spongia2020\tilesets\TestTileset.gbr
    Plane count   : 1 plane (8 bits)
    Plane order   : Tiles are continues
    Tile offset   : 0
@@ -21,6 +21,7 @@
 #define TestMapWidth 20
 #define TestMapHeight 18
 #define TestMapBank 0
+#define COLLISION_CUTOFF_TEST_MAP 7
 
 extern unsigned char TestMap[];
 
