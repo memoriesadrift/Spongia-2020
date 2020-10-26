@@ -313,6 +313,15 @@ INT8 detect_collision(UINT8 newx, UINT8 newy)
     return newy;
 }
 
+// Function for falling
+void fall()
+{
+    currentSpeedY = currentSpeedY + gravity;
+    if (currentSpeedY < -7) currentSpeedY = -7;
+
+    player.y = player.y - currentSpeedY;
+    player.y = detect_collision(player.x, player.y);
+}
 
 // Jump function
 void jump()
@@ -323,13 +332,9 @@ void jump()
         currentSpeedY = 10;
     }
 
-    currentSpeedY = currentSpeedY + gravity;
-    if (currentSpeedY < -7) currentSpeedY = -7;
-
-    player.y = player.y - currentSpeedY;
-
-    player.y = detect_collision(player.x, player.y);
+    fall();
 }
+
 
 int main()
 {
@@ -369,11 +374,13 @@ int main()
             }
         }
 
+        
         move_player(player.x, player.y);
 
         // Animation
         if(advanceAnimation == 2)
         {
+            fall();
             advanceAnimation = 0;
             advance_player_animation();
         } else
