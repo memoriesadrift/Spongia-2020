@@ -1,6 +1,5 @@
-// FIXME: x-axis collision, currently, if the player walks into a block from the side, it won't count as a collision
-// TODO: smooth out falling, it happens too fast, possibly due to fall() being called twice? see comment in main()
-// TODO: add jumping animation!
+// FIXME: implement x-axis collision, currently, if the player walks into a block from the side, it won't count as a collision
+// TODO: fix jumping animation! dont want it to loop while jumping as it is now
 // TODO: add "standing facing left/right" animation - detection for if player is currently moving or not
 
 // Generic Includes
