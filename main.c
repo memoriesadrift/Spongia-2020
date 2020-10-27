@@ -19,6 +19,8 @@ UBYTE advanceAnimation; // player animation is 50% slower than game ticks, at th
 char* currentMap;
 char* currentTileSet;
 UINT8 currentCollisionTileCutoff;
+UINT8 i8; // for loop variable for reusable code - less memory needed to be allocated
+UINT8 j8; // same as above, but for nested for loops
 
 // Bigger sprite supporting struct
 struct GameObject 
@@ -44,12 +46,54 @@ struct GameObject player;
 
 // CPU Efficient waiting function to be used
 // when waiting is needed
-void efficient_wait(INT16 loops)
+void efficient_wait(UINT8 loops)
 {
-    INT16 i = 0;
-    for (i; i < loops; ++i)
+    UINT8 wait = 0;
+    for (wait; wait < loops; ++wait)
     {
         wait_vbl_done();
+    }
+}
+
+// Fades out the screen
+void fadeout(UINT8 fadeRate){
+    for (i8 = 0; i8 < 4; ++i8){
+        switch(i8){
+            case 0:
+                BGP_REG = 0xE4;
+                break;
+            case 1:
+                BGP_REG = 0xF9;
+                break;
+            case 2:
+                BGP_REG = 0xFE;
+                break;
+            case 3:
+                BGP_REG = 0xFF;
+                break;
+        }
+        efficient_wait(fadeRate);
+    }
+}
+
+// Fades in the screen
+void fadein(UINT8 fadeRate){
+    for (i8 = 0; i8 < 4; ++i8){
+        switch(i8){
+            case 0:
+                BGP_REG = 0xFF;
+                break;
+            case 1:
+                BGP_REG = 0xFE;
+                break;
+            case 2:
+                BGP_REG = 0xF9;
+                break;
+            case 3:
+                BGP_REG = 0xE4;
+                break;
+        }
+        efficient_wait(fadeRate);
     }
 }
 
