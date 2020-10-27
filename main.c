@@ -312,7 +312,7 @@ void setup_game()
 
 // collision detection
 // WARNING: Sprite is tracked by its top left corner, this function checks collisions with the BOTTOM LEFT
-INT8 detect_collision(UINT8 newx, UINT8 newy)
+INT8 detect_collision(UINT8 newx, UINT8 newy) //FIXME: maybe this should not check entire sprite width
 {
     UINT16 indexTLx, indexTLy, tileindexTL;
 
@@ -320,7 +320,7 @@ INT8 detect_collision(UINT8 newx, UINT8 newy)
     indexTLy = (newy) / 8; // ney-16 for the TOP LEFT of sprite
     tileindexTL = 20 * indexTLy + indexTLx;
 
-    if ((UBYTE) currentMap[tileindexTL] < COLLISION_CUTOFF_TEST_MAP){
+    if ((UBYTE) currentMap[tileindexTL] < COLLISION_CUTOFF_TEST_MAP || newx != indexTLx && (UBYTE) currentMap[tileindexTL+1] < COLLISION_CUTOFF_TEST_MAP){ //also check block to right to see if right half of sprite has collision
         airborne = 0;
         currentSpeedY = 0;
         fall_counter = 0;
