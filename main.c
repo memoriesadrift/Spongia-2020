@@ -349,6 +349,7 @@ INT8 detect_collision(UINT8 newx, UINT8 newy)
 
     if ((UBYTE) currentMap[tileindexTL] < COLLISION_CUTOFF_TEST_MAP){
         airborne = 0;
+        currentSpeedY = 0;
         return (indexTLy*8u); // -16u for the TOP LEFT of sprite
     }
 
