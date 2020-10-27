@@ -347,7 +347,7 @@ INT8 detect_collision(UINT8 newx, UINT8 newy) //FIXME: maybe this should not che
     indexTLy = (newy) / 8; // ney-16 for the TOP LEFT of sprite
     tileindexTL = 20 * indexTLy + indexTLx;
 
-    if ((UBYTE) currentMap[tileindexTL] < COLLISION_CUTOFF_TEST_MAP || (UBYTE) currentMap[tileindexTL+1] < COLLISION_CUTOFF_TEST_MAP){ //also check block to right to see if right half of sprite has collision
+    if ((UBYTE) currentMap[tileindexTL] < COLLISION_CUTOFF_TEST_MAP || newx != indexTLx && (UBYTE) currentMap[tileindexTL+1] < COLLISION_CUTOFF_TEST_MAP){ //also check block to right to see if right half of sprite has collision
         airborne = 0;
         return (indexTLy*8u); // -16u for the TOP LEFT of sprite
     }
