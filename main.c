@@ -370,11 +370,16 @@ void jump()
 {
     if(airborne==0)
     {
+        if (facing = -1)
+        {
+            change_player_animation(4);
+        }else
+        {
+            change_player_animation(5);
+        }
         airborne=1;
         currentSpeedY = 10;
     }
-
-    fall();
 }
 
 
@@ -416,14 +421,12 @@ int main()
             }
         }
 
-        
+        fall();
         move_player(player.x, player.y);
 
         // Animation
         if(advanceAnimation == 2)
         {
-            fall(); // fall called only every few game ticks, because falling and jumping was extremely fast otherwise
-                    // this can probably be fixed some way and someone should do it
             advanceAnimation = 0;
             advance_player_animation();
         } else
