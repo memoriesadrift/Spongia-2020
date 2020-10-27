@@ -40,6 +40,7 @@ BYTE facing;
 BYTE airborne;
 INT8 gravity; // FIXME: const?
 INT16 currentSpeedY;
+UBYTE fall_counter;
 
 // Player vars
 struct GameObject player;
@@ -96,35 +97,6 @@ void fadein(UINT8 fadeRate){
         efficient_wait(fadeRate);
     }
 }
-
-// A recursive binary search function. It returns 
-// location of x in given array arr[l..r] is present, 
-// otherwise -1 
-BYTE binary_search(unsigned char* arr, UINT8 l, UINT8 r, unsigned char x) 
-{ 
-    if (r >= l) { 
-        UINT8 mid = l + (r - l) / 2; 
-  
-        // If the element is present at the middle 
-        // itself 
-        if (arr[mid] == x) 
-            return mid; 
-  
-        // If element is smaller than mid, then 
-        // it can only be present in left subarray 
-        if (arr[mid] > x) 
-            return binary_search(arr, l, mid - 1, x); 
-  
-        // Else the element can only be present 
-        // in right subarray 
-        return binary_search(arr, mid + 1, r, x); 
-    } 
-  
-    // We reach here when element is not 
-    // present in array 
-    return -1; 
-} 
-
 // Function to move n x n tile game objects
 void move_game_object(struct GameObject* obj, UINT8 x, UINT8 y)
 {
@@ -332,9 +304,10 @@ void setup_game()
     SHOW_SPRITES;
     SHOW_BKG;
     DISPLAY_ON;
-    gravity = -2;
+    gravity = -3;
     gameRunning = 1;
     advanceAnimation = 0;
+    fall_counter = 0;
 }
 
 // collision detection
@@ -349,6 +322,8 @@ INT8 detect_collision(UINT8 newx, UINT8 newy)
 
     if ((UBYTE) currentMap[tileindexTL] < COLLISION_CUTOFF_TEST_MAP){
         airborne = 0;
+        currentSpeedY = 0;
+        fall_counter = 0;
         return (indexTLy*8u); // -16u for the TOP LEFT of sprite
     }
 
@@ -358,7 +333,13 @@ INT8 detect_collision(UINT8 newx, UINT8 newy)
 // Function for falling
 void fall()
 {
-    currentSpeedY = currentSpeedY + gravity;
+    if(fall_counter != 3) { //don't apply gravity every third frame. essentialy making it 2/3*g
+        currentSpeedY = currentSpeedY + gravity/2;
+        ++fall_counter;
+    } else
+        fall_counter = 0;
+        
+
     if (currentSpeedY < -7) currentSpeedY = -7;
 
     player.y = player.y - currentSpeedY;
@@ -370,11 +351,16 @@ void jump()
 {
     if(airborne==0)
     {
+        if (facing = -1)
+        {
+            change_player_animation(4);
+        }else
+        {
+            change_player_animation(5);
+        }
         airborne=1;
-        currentSpeedY = 10;
+        currentSpeedY = 7;
     }
-
-    fall();
 }
 
 
@@ -383,15 +369,10 @@ int main()
     setup_game();
     move_player(player.x, player.y);
 
+
+    
     while(gameRunning)
     {
-        // this check allows us to use a switch for the movement (prettier) but also enables
-        // moving while in the air, which is nice.
-        if (airborne)
-        {
-            // fall
-        }
-
 
         // joypad controls
         UBYTE j = joypad();
@@ -416,14 +397,13 @@ int main()
             }
         }
 
-        
+        fall();
+
         move_player(player.x, player.y);
 
         // Animation
         if(advanceAnimation == 2)
         {
-            fall(); // fall called only every few game ticks, because falling and jumping was extremely fast otherwise
-                    // this can probably be fixed some way and someone should do it
             advanceAnimation = 0;
             advance_player_animation();
         } else
