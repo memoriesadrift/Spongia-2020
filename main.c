@@ -44,6 +44,15 @@ UBYTE fall_counter;
 // Player vars
 struct GameObject player;
 
+
+//fucntion declarations
+UINT8 detect_collision_x(UINT8 newx, UINT8 newy);
+
+
+
+
+
+
 // CPU Efficient waiting function to be used
 // when waiting is needed
 void efficient_wait(UINT8 loops)
@@ -191,7 +200,7 @@ void scroll_game_object(struct GameObject* obj, INT8 movex, INT8 movey)
 // Player movement function
 void move_player(UINT8 x, UINT8 y)
 {
-    move_game_object(&player, x, y);
+    move_game_object(&player, detect_collision_x(x, y), y);
 }
 
 // Player scroll function
@@ -309,27 +318,27 @@ void setup_game()
     fall_counter = 0;
 }
 
-/*INT8 detect_collision_x(UINT8 newx, UINT8 newy) //FIXME: maybe this should not check entire sprite width
+
+//FIXME: only works from the right. Probably best to do two separate fucntions
+UINT8 detect_collision_x(UINT8 newx, UINT8 newy) //FIXME: maybe this should not check entire sprite width
 {
     UINT16 indexTLx, indexTLy, tileindexTL;
 
     indexTLx = (newx) / 8;
-    indexTLy = (newy+8) / 8; // ney-16 for the TOP LEFT of sprite
+    indexTLy = (newy-8) / 8;
     tileindexTL = 20 * indexTLy + indexTLx;
 
-    if ((UBYTE) currentMap[tileindexTL] < COLLISION_CUTOFF_TEST_MAP || (UBYTE) currentMap[tileindexTL+1] < COLLISION_CUTOFF_TEST_MAP){ //also check block to right to see if right half of sprite has collision
-        airborne = 0;
-        currentSpeedY = 0;
-        fall_counter = 0;
-        return (indexTLy*8u); // -16u for the TOP LEFT of sprite
+    if ((UBYTE) currentMap[tileindexTL] < COLLISION_CUTOFF_TEST_MAP || (UBYTE) currentMap[tileindexTL-20] < COLLISION_CUTOFF_TEST_MAP){ //also check block to right to see if right half of sprite has collision
+        return indexTLx*8u;
     }
 
-    return newy;
-}*/
+    return newx;
+}
 
+//FXIME: doesnt check for collision above
 // collision detection
 // WARNING: Sprite is tracked by its top left corner, this function checks collisions with the BOTTOM LEFT
-INT8 detect_collision_y(UINT8 newx, UINT8 newy) //FIXME: maybe this should not check entire sprite width
+UINT8 detect_collision_y(UINT8 newx, UINT8 newy) //FIXME: maybe this should not check entire sprite width
 {
     UINT16 indexTLx, indexTLy, tileindexTL;
 
