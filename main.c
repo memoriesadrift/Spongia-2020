@@ -309,9 +309,27 @@ void setup_game()
     fall_counter = 0;
 }
 
+/*INT8 detect_collision_x(UINT8 newx, UINT8 newy) //FIXME: maybe this should not check entire sprite width
+{
+    UINT16 indexTLx, indexTLy, tileindexTL;
+
+    indexTLx = (newx) / 8;
+    indexTLy = (newy+8) / 8; // ney-16 for the TOP LEFT of sprite
+    tileindexTL = 20 * indexTLy + indexTLx;
+
+    if ((UBYTE) currentMap[tileindexTL] < COLLISION_CUTOFF_TEST_MAP || (UBYTE) currentMap[tileindexTL+1] < COLLISION_CUTOFF_TEST_MAP){ //also check block to right to see if right half of sprite has collision
+        airborne = 0;
+        currentSpeedY = 0;
+        fall_counter = 0;
+        return (indexTLy*8u); // -16u for the TOP LEFT of sprite
+    }
+
+    return newy;
+}*/
+
 // collision detection
 // WARNING: Sprite is tracked by its top left corner, this function checks collisions with the BOTTOM LEFT
-INT8 detect_collision(UINT8 newx, UINT8 newy) //FIXME: maybe this should not check entire sprite width
+INT8 detect_collision_y(UINT8 newx, UINT8 newy) //FIXME: maybe this should not check entire sprite width
 {
     UINT16 indexTLx, indexTLy, tileindexTL;
 
@@ -319,7 +337,7 @@ INT8 detect_collision(UINT8 newx, UINT8 newy) //FIXME: maybe this should not che
     indexTLy = (newy) / 8; // ney-16 for the TOP LEFT of sprite
     tileindexTL = 20 * indexTLy + indexTLx;
 
-    if ((UBYTE) currentMap[tileindexTL] < COLLISION_CUTOFF_TEST_MAP || newx != indexTLx && (UBYTE) currentMap[tileindexTL+1] < COLLISION_CUTOFF_TEST_MAP){ //also check block to right to see if right half of sprite has collision
+    if ((UBYTE) currentMap[tileindexTL] < COLLISION_CUTOFF_TEST_MAP || (UBYTE) currentMap[tileindexTL+1] < COLLISION_CUTOFF_TEST_MAP){ //also check block to right to see if right half of sprite has collision
         airborne = 0;
         currentSpeedY = 0;
         fall_counter = 0;
@@ -342,7 +360,7 @@ void fall()
     if (currentSpeedY < -7) currentSpeedY = -7;
 
     player.y = player.y - currentSpeedY;
-    player.y = detect_collision(player.x, player.y);
+    player.y = detect_collision_y(player.x, player.y);
 }
 
 // Jump function
