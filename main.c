@@ -16,12 +16,17 @@
 BYTE gameRunning;
 const UINT8 tileSize = 8; // FIXME: doesn't work as #define TILESIZE 8 in move_sprite() function call - why?
 UBYTE advanceAnimation; // player animation is 50% slower than game ticks, at the moment so we have to advance the animation every other tick
-char* currentMap;
-char* currentTileSet;
-UINT8 currentCollisionTileCutoff;
+
 UINT8 i8; // for loop variable for reusable code - less memory needed to be allocated
 UINT8 j8; // same as above, but for nested for loops
 UINT8 level; // tracks which level the player is in, for map loading and game flow
+
+// Map variables
+char* currentMap;
+char* currentTileSet;
+UINT8 currentCollisionTileCutoff;
+UINT8 currentMapWidth;
+UINT8 currentMapHeight;
 
 // Bigger sprite supporting struct
 struct GameObject 
@@ -37,14 +42,23 @@ struct GameObject
     UINT8 animationType; //0 - idle left, 1 - idle right, 2 - walk left, 3 - walk right, 4 - jump left, 5 - jump right 
     // TODO: introduce constants for player animation types and lengths
 };
+
+// Player vars
+struct GameObject player;
 BYTE facing;
 BYTE airborne;
 INT8 gravity; // FIXME: const?
 INT16 currentSpeedY;
 UBYTE fall_counter;
 
-// Player vars
-struct GameObject player;
+
+
+//fucntion declarations
+
+
+
+
+
 
 // CPU Efficient waiting function to be used
 // when waiting is needed
@@ -272,6 +286,10 @@ void advance_player_animation()
     set_sprite_tile(player.spriteids[1], player.spritenos[1]);
 }
 
+
+
+
+
 void setup_player()
 {
     set_sprite_data(0, 31, playerSprites);
@@ -303,6 +321,8 @@ void load_map(UINT8 mapId)
         currentMap = TestMap;
         currentTileSet = TestTileset;
         currentCollisionTileCutoff = 7;
+        currentMapHeight = TestMapHeight;
+        currentMapWidth = TestMapWidth;
         break;
     case 1:
         // level 1
@@ -311,6 +331,8 @@ void load_map(UINT8 mapId)
         currentMap = Level1Map;
         currentTileSet = TestTileset;
         currentCollisionTileCutoff = 7;
+        currentMapHeight = Level1MapHeight;
+        currentMapWidth = Level1MapWidth;
     default:
         break;
     }
@@ -340,24 +362,28 @@ void setup_game()
     fall_counter = 0;
 }
 
-// collision detection
-// WARNING: Sprite is tracked by its top left corner, this function checks collisions with the BOTTOM LEFT
-INT8 detect_collision(UINT8 newx, UINT8 newy) //FIXME: maybe this should not check entire sprite width
-{
-    UINT16 indexTLx, indexTLy, tileindexTL;
 
-    indexTLx = (newx - 8) / 8;
-    indexTLy = (newy) / 8; // ney-16 for the TOP LEFT of sprite
-    tileindexTL = 20 * indexTLy + indexTLx;
 
-    if ((UBYTE) currentMap[tileindexTL] < COLLISION_CUTOFF_TEST_MAP || newx != indexTLx && (UBYTE) currentMap[tileindexTL+1] < COLLISION_CUTOFF_TEST_MAP){ //also check block to right to see if right half of sprite has collision
-        airborne = 0;
-        currentSpeedY = 0;
-        fall_counter = 0;
-        return (indexTLy*8u); // -16u for the TOP LEFT of sprite
-    }
 
-    return newy;
+
+UINT8 get_tile_x(UINT8 x){
+    return (x-8u)/8u;
+}
+
+UINT8 get_tile_y(UINT8 y){
+    return (y-16u)/8u;
+}
+
+//new collision block
+
+BOOLEAN has_collision(UINT8 x, UINT8 y){
+    UINT16 tileindexTL = currentMapWidth * get_tile_y(y) + get_tile_x(x);
+
+    if ((UBYTE) currentMap[tileindexTL] < currentCollisionTileCutoff )
+        return TRUE;
+
+    return FALSE;
+
 }
 
 // Function for falling
@@ -370,10 +396,27 @@ void fall()
         fall_counter = 0;
         
 
-    if (currentSpeedY < -7) currentSpeedY = -7;
+    if (currentSpeedY < -7)
+        currentSpeedY = -7;
 
     player.y = player.y - currentSpeedY;
-    player.y = detect_collision(player.x, player.y);
+    //if(has_collision(player.x, player.y+16u)){ //collision down
+
+    if(has_collision(player.x, player.y+16u) || has_collision(player.x+8u, player.y+16u)){
+        player.y = get_tile_y(player.y+16)*8u - 16u + 16u;//last 16u is for coordinate offset
+        airborne = 0;
+        currentSpeedY = 0;
+        fall_counter = 0;
+    }
+
+
+    if(has_collision(player.x, player.y-8u) || has_collision(player.x+8u, player.y-8u)){
+        player.y = get_tile_y(player.y-8u)*8u +16u + 16u;//last 16u is for coordinate offset
+        if(currentSpeedY < 0)
+            currentSpeedY = 0;
+    }
+    
+    //player.y = detect_collision_y(player.x, player.y);
 }
 
 // Jump function
@@ -403,13 +446,16 @@ int main()
     {
 
         // joypad controls
-        UBYTE j = joypad();
+        UBYTE j = joypad(); // FIXME: is there a reason for this?
 
-        if((j & J_A && !airborne) || airborne){ //FIXME: I am not sure I did this right!!!
+        if(j & J_A && !airborne){
             jump();
         }
         if(j & J_LEFT){
             player.x -= 1;
+            if(has_collision(player.x-8u, player.y) || has_collision(player.x-8u, player.y+8u)){
+                player.x +=1;
+            }
             if (facing != -1)
             {
                 facing = -1;
@@ -418,16 +464,20 @@ int main()
         }
         if(j & J_RIGHT){
             player.x += 1;
+            if(has_collision(player.x+8u, player.y) || has_collision(player.x+8u, player.y+8u)){
+                player.x -=1;
+            }
             if (facing != 1)
             {
                 facing = 1;
                 change_player_animation(3);
             }
         }
-
+        
         fall();
 
         move_player(player.x, player.y);
+        
 
         // Animation
         if(advanceAnimation == 2)
@@ -439,6 +489,7 @@ int main()
             ++advanceAnimation;
         }
 
+        // Map changing, temporary
         if (player.x > 168 && player.y > 48 && player.y < 88)
         {
             change_map(1);
