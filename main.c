@@ -60,6 +60,14 @@ UBYTE fall_counter;
 
 
 
+
+//fucntion declarations
+
+
+
+
+
+
 // CPU Efficient waiting function to be used
 // when waiting is needed
 void efficient_wait(UINT8 loops)
@@ -380,6 +388,7 @@ BOOLEAN has_collision(UINT8 x, UINT8 y){
     UINT16 tileindexTL = currentMapWidth * get_tile_y(y) + get_tile_x(x);
 
     if ((UBYTE) currentMap[tileindexTL] < currentCollisionTileCutoff )
+
         return TRUE;
 
     return FALSE;
