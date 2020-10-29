@@ -9,6 +9,7 @@
 #include "gfx/playerSprites.c"
 #include "gfx/TestTileset.c"
 #include "gfx/TestMap.c"
+#include "gfx/Level1Map.c"
 // TODO: Split generic functions into separate header files eventually?
 
 // Engine related variables
@@ -20,6 +21,7 @@ char* currentTileSet;
 UINT8 currentCollisionTileCutoff;
 UINT8 i8; // for loop variable for reusable code - less memory needed to be allocated
 UINT8 j8; // same as above, but for nested for loops
+UINT8 level; // tracks which level the player is in, for map loading and game flow
 
 // Bigger sprite supporting struct
 struct GameObject 
@@ -287,8 +289,8 @@ void setup_player()
     set_sprite_data(0, 31, playerSprites);
     player.height = 16;
     player.width = 8;
-    player.x = 8; // placeholder
-    player.y = 96; // placeholder
+    //player.x = 8; // placeholder
+    //player.y = 96; // placeholder
     player.animationLength = 2;
     player.animationType = 0; // idle
     player.animationStep = 0;
@@ -301,17 +303,46 @@ void setup_player()
     airborne = 0;
 }
 
+// generic function for loading maps
+void load_map(UINT8 mapId)
+{
+    switch (mapId)
+    {
+    case 0:
+        // test map
+        set_bkg_data(0, 46, TestTileset);
+        set_bkg_tiles(0, 0, 20, 18, TestMap);
+        currentMap = TestMap;
+        currentTileSet = TestTileset;
+        currentCollisionTileCutoff = 7;
+        break;
+    case 1:
+        // level 1
+        set_bkg_data(0, 46, TestTileset);
+        set_bkg_tiles(0, 0, 40, 18, Level1Map);
+        currentMap = Level1Map;
+        currentTileSet = TestTileset;
+        currentCollisionTileCutoff = 7;
+    default:
+        break;
+    }
+}
+
+// function for changing maps, with cool fade effect
+void change_map(UINT8 mapId)
+{
+    fadeout(5);
+    load_map(mapId);
+    fadein(5);
+}
+
 // Function to setup game
 // to be called at the beginning of main
 // sets up bg, turns on display, etc.
 void setup_game()
 {
     setup_player();
-    set_bkg_data(0, 46, TestTileset);
-    set_bkg_tiles(0, 0, 20, 18, TestMap);
-    currentMap = TestMap;
-    currentTileSet = TestTileset;
-    currentCollisionTileCutoff = 7;
+    load_map(0);
     SHOW_SPRITES;
     SHOW_BKG;
     DISPLAY_ON;
@@ -399,10 +430,8 @@ void jump()
 int main()
 {
     setup_game();
-    move_player(player.x, player.y);
+    move_player(8, 96);
 
-
-    //move_player(160/2, 144/2);
     while(gameRunning)
     {
 
@@ -449,6 +478,13 @@ int main()
         {
             ++advanceAnimation;
         }
+
+        if (player.x > 168 && player.y > 48 && player.y < 88)
+        {
+            change_map(1);
+            move_player(8,96);
+        }
+        
 
         // end of game tick, delay
         efficient_wait(2);
