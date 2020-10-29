@@ -46,6 +46,14 @@ UBYTE fall_counter;
 // Player vars
 struct GameObject player;
 
+
+//fucntion declarations
+
+
+
+
+
+
 // CPU Efficient waiting function to be used
 // when waiting is needed
 void efficient_wait(UINT8 loops)
@@ -272,6 +280,10 @@ void advance_player_animation()
     set_sprite_tile(player.spriteids[1], player.spritenos[1]);
 }
 
+
+
+
+
 void setup_player()
 {
     set_sprite_data(0, 31, playerSprites);
@@ -340,24 +352,28 @@ void setup_game()
     fall_counter = 0;
 }
 
-// collision detection
-// WARNING: Sprite is tracked by its top left corner, this function checks collisions with the BOTTOM LEFT
-INT8 detect_collision(UINT8 newx, UINT8 newy) //FIXME: maybe this should not check entire sprite width
-{
-    UINT16 indexTLx, indexTLy, tileindexTL;
 
-    indexTLx = (newx - 8) / 8;
-    indexTLy = (newy) / 8; // ney-16 for the TOP LEFT of sprite
-    tileindexTL = 20 * indexTLy + indexTLx;
 
-    if ((UBYTE) currentMap[tileindexTL] < COLLISION_CUTOFF_TEST_MAP || newx != indexTLx && (UBYTE) currentMap[tileindexTL+1] < COLLISION_CUTOFF_TEST_MAP){ //also check block to right to see if right half of sprite has collision
-        airborne = 0;
-        currentSpeedY = 0;
-        fall_counter = 0;
-        return (indexTLy*8u); // -16u for the TOP LEFT of sprite
-    }
 
-    return newy;
+
+UINT8 get_tile_x(UINT8 x){
+    return (x-8u)/8u;
+}
+
+UINT8 get_tile_y(UINT8 y){
+    return (y-16u)/8u;
+}
+
+//new collision block
+
+BOOLEAN has_collision(UINT8 x, UINT8 y){
+    UINT16 tileindexTL = 20 * get_tile_y(y) + get_tile_x(x);
+
+    if ((UBYTE) currentMap[tileindexTL] < COLLISION_CUTOFF_TEST_MAP )
+        return TRUE;
+
+    return FALSE;
+
 }
 
 // Function for falling
@@ -370,10 +386,27 @@ void fall()
         fall_counter = 0;
         
 
-    if (currentSpeedY < -7) currentSpeedY = -7;
+    if (currentSpeedY < -7)
+        currentSpeedY = -7;
 
     player.y = player.y - currentSpeedY;
-    player.y = detect_collision(player.x, player.y);
+    //if(has_collision(player.x, player.y+16u)){ //collision down
+
+    if(has_collision(player.x, player.y+16u) || has_collision(player.x+8u, player.y+16u)){
+        player.y = get_tile_y(player.y+16)*8u - 16u + 16u;//last 16u is for coordinate offset
+        airborne = 0;
+        currentSpeedY = 0;
+        fall_counter = 0;
+    }
+
+
+    if(has_collision(player.x, player.y-8u) || has_collision(player.x+8u, player.y-8u)){
+        player.y = get_tile_y(player.y-8u)*8u +16u + 16u;//last 16u is for coordinate offset
+        if(currentSpeedY < 0)
+            currentSpeedY = 0;
+    }
+    
+    //player.y = detect_collision_y(player.x, player.y);
 }
 
 // Jump function
@@ -405,11 +438,14 @@ int main()
         // joypad controls
         UBYTE j = joypad();
 
-        if((j & J_A && !airborne) || airborne){ //FIXME: I am not sure I did this right!!!
+        if(j & J_A && !airborne){
             jump();
         }
         if(j & J_LEFT){
             player.x -= 1;
+            if(has_collision(player.x-8u, player.y) || has_collision(player.x-8u, player.y+8u)){
+                player.x +=1;
+            }
             if (facing != -1)
             {
                 facing = -1;
@@ -418,16 +454,20 @@ int main()
         }
         if(j & J_RIGHT){
             player.x += 1;
+            if(has_collision(player.x+8u, player.y) || has_collision(player.x+8u, player.y+8u)){
+                player.x -=1;
+            }
             if (facing != 1)
             {
                 facing = 1;
                 change_player_animation(3);
             }
         }
-
+        
         fall();
 
         move_player(player.x, player.y);
+        
 
         // Animation
         if(advanceAnimation == 2)
