@@ -27,6 +27,8 @@ char* currentTileSet;
 UINT8 currentCollisionTileCutoff;
 UINT8 currentMapWidth;
 UINT8 currentMapHeight;
+UINT8 xOffset;
+UINT8 yOffset;
 
 // Bigger sprite supporting struct
 struct GameObject 
@@ -311,6 +313,31 @@ void load_map(UINT8 mapId)
     }
 }
 
+// Function to change player offset
+void set_player_offset(UINT8 x, UINT8 y)
+{
+    xOffset = x/8;
+    yOffset = y/8;
+}
+
+// Function to add to player ofset
+void incr_player_offset(INT8 x, INT8 y)
+{
+    xOffset += x/8;
+    yOffset += y/8;
+}
+
+// Get offset in pixels
+UINT8 get_x_offset()
+{
+    return xOffset*8;
+}
+
+UINT8 get_y_offset()
+{
+    return yOffset*8;
+}
+
 // function for changing maps, with cool fade effect
 void change_map(UINT8 mapId)
 {
@@ -320,18 +347,19 @@ void change_map(UINT8 mapId)
 }
 
 UINT8 get_tile_x(UINT8 x){
-    return (x-8u)/8u;
+    return (x-8u)/8u + xOffset;
 }
 
 UINT8 get_tile_y(UINT8 y){
-    return (y-16u)/8u;
+    return (y-16u)/8u +yOffset;
 }
 
 //new collision block
 
 BOOLEAN has_collision(UINT8 x, UINT8 y){
     UINT16 tileindexTL = currentMapWidth * get_tile_y(y) + get_tile_x(x);
-
+    *((UINT8*)0xC0A0) = get_tile_x(x);
+    *((UINT8*)0xC0A1) = get_tile_y(y);
     if ((UBYTE) currentMap[tileindexTL] < currentCollisionTileCutoff )
 
         return TRUE;
@@ -369,8 +397,6 @@ void fall()
         if(currentSpeedY < 0)
             currentSpeedY = 0;
     }
-    
-    //player.y = detect_collision_y(player.x, player.y);
 }
 
 // Jump function
@@ -400,6 +426,8 @@ void setup_player()
     player.width = 8;
     //player.x = 8; // placeholder
     //player.y = 96; // placeholder
+    xOffset = 0;
+    yOffset = 0;
     player.animationLength = 2;
     player.animationType = 0; // idle
     player.animationStep = 0;
@@ -488,6 +516,8 @@ int main()
         } else if (player.x > 154 && currentMap != TestMap)
         {
             scroll_bkg(8,0);
+            move_player(player.x-8, player.y);
+            incr_player_offset(8,0);
         }
         
 
