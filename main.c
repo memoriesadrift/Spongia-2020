@@ -52,19 +52,7 @@ INT16 currentSpeedY;
 UBYTE fall_counter;
 
 
-
 //fucntion declarations
-
-
-
-
-
-
-
-//fucntion declarations
-
-
-
 
 
 
@@ -294,29 +282,6 @@ void advance_player_animation()
     set_sprite_tile(player.spriteids[1], player.spritenos[1]);
 }
 
-
-
-
-
-void setup_player()
-{
-    set_sprite_data(0, 31, playerSprites);
-    player.height = 16;
-    player.width = 8;
-    //player.x = 8; // placeholder
-    //player.y = 96; // placeholder
-    player.animationLength = 2;
-    player.animationType = 0; // idle
-    player.animationStep = 0;
-    player.spriteids[0] = 0;
-    player.spriteids[1] = 1;
-    player.spritenos[0] = 0;
-    player.spritenos[1] = 1;
-    set_sprite_tile(player.spriteids[0], player.spritenos[0]);
-    set_sprite_tile(player.spriteids[1], player.spritenos[1]);
-    airborne = 0;
-}
-
 // generic function for loading maps
 void load_map(UINT8 mapId)
 {
@@ -353,26 +318,6 @@ void change_map(UINT8 mapId)
     load_map(mapId);
     fadein(5);
 }
-
-// Function to setup game
-// to be called at the beginning of main
-// sets up bg, turns on display, etc.
-void setup_game()
-{
-    setup_player();
-    load_map(0);
-    SHOW_SPRITES;
-    SHOW_BKG;
-    DISPLAY_ON;
-    gravity = -3;
-    gameRunning = 1;
-    advanceAnimation = 0;
-    fall_counter = 0;
-}
-
-
-
-
 
 UINT8 get_tile_x(UINT8 x){
     return (x-8u)/8u;
@@ -445,6 +390,43 @@ void jump()
     }
 }
 
+
+// Setup Functions
+
+void setup_player()
+{
+    set_sprite_data(0, 31, playerSprites);
+    player.height = 16;
+    player.width = 8;
+    //player.x = 8; // placeholder
+    //player.y = 96; // placeholder
+    player.animationLength = 2;
+    player.animationType = 0; // idle
+    player.animationStep = 0;
+    player.spriteids[0] = 0;
+    player.spriteids[1] = 1;
+    player.spritenos[0] = 0;
+    player.spritenos[1] = 1;
+    set_sprite_tile(player.spriteids[0], player.spritenos[0]);
+    set_sprite_tile(player.spriteids[1], player.spritenos[1]);
+    airborne = 0;
+}
+
+// Function to setup game
+// to be called at the beginning of main
+// sets up bg, turns on display, etc.
+void setup_game()
+{
+    setup_player();
+    load_map(0);
+    SHOW_SPRITES;
+    SHOW_BKG;
+    DISPLAY_ON;
+    gravity = -3;
+    gameRunning = 1;
+    advanceAnimation = 0;
+    fall_counter = 0;
+}
 
 int main()
 {
