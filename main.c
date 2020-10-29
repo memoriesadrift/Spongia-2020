@@ -489,11 +489,14 @@ int main()
             ++advanceAnimation;
         }
 
-        // Map changing, temporary
+        // Reached right end of screen
         if (player.x > 168 && player.y > 48 && player.y < 88)
         {
             change_map(1);
             move_player(8,96);
+        } else if (player.x > 154 && currentMap != TestMap)
+        {
+            scroll_bkg(8,0);
         }
         
 
