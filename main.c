@@ -4,6 +4,7 @@
 
 // Generic Includes
 #include <gb/gb.h>
+#include <stdio.h>
 
 // Graphics
 #include "gfx/playerSprites.c"
@@ -347,7 +348,7 @@ void change_map(UINT8 mapId)
 }
 
 UINT8 get_tile_x(UINT8 x){
-    return (x-8u)/8u + xOffset;
+    return (x-8u)/8u +xOffset;
 }
 
 UINT8 get_tile_y(UINT8 y){
@@ -356,16 +357,22 @@ UINT8 get_tile_y(UINT8 y){
 
 //new collision block
 
-BOOLEAN has_collision(UINT8 x, UINT8 y){
+/*BOOLEAN has_collision(UINT8 x, UINT8 y){
     UINT16 tileindexTL = currentMapWidth * get_tile_y(y) + get_tile_x(x);
-    *((UINT8*)0xC0A0) = get_tile_x(x);
-    *((UINT8*)0xC0A1) = get_tile_y(y);
     if ((UBYTE) currentMap[tileindexTL] < currentCollisionTileCutoff )
 
         return TRUE;
 
     return FALSE;
 
+}*/
+
+BOOLEAN has_collision(UINT8 tile_x, UINT8 tile_y){
+    UINT16 tileindexTL = currentMapWidth * tile_y + tile_x;
+    if ((UBYTE) currentMap[tileindexTL] < currentCollisionTileCutoff)
+        return TRUE;
+
+    return FALSE;
 }
 
 // Function for falling
@@ -382,18 +389,17 @@ void fall()
         currentSpeedY = -7;
 
     player.y = player.y - currentSpeedY;
-    //if(has_collision(player.x, player.y+16u)){ //collision down
 
-    if(has_collision(player.x, player.y+16u) || has_collision(player.x+8u, player.y+16u)){
-        player.y = get_tile_y(player.y+16)*8u - 16u + 16u;//last 16u is for coordinate offset
-        airborne = 0;
-        currentSpeedY = 0;
-        fall_counter = 0;
+    if(has_collision(get_tile_x(player.x), get_tile_y(player.y)+2u) || has_collision(get_tile_x(player.x)+1u, get_tile_y(player.y)+2u)){ //collision down
+        player.y = (get_tile_y(player.y)+2u)*8u - 16u + 16u;//last 16u is for coordinate offset
+        airborne = 0u;
+        currentSpeedY = 0u;
+        fall_counter = 0u;
     }
 
 
-    if(has_collision(player.x, player.y-8u) || has_collision(player.x+8u, player.y-8u)){
-        player.y = get_tile_y(player.y-8u)*8u +16u + 16u;//last 16u is for coordinate offset
+    if(has_collision(get_tile_x(player.x), get_tile_y(player.y)) || has_collision(get_tile_x(player.x)+1u, get_tile_y(player.y))){ //collision up
+        player.y = get_tile_y(player.y)*8u +8u + 16u;//last 16u is for coordinate offset
         if(currentSpeedY < 0)
             currentSpeedY = 0;
     }
@@ -464,6 +470,10 @@ int main()
     while(gameRunning)
     {
 
+        //printf("adfa");
+        *((UINT8*)0xC080) = has_collision(0x13*8 + 8, 0x08*8 + 16);
+        //*((UINT8*)0xC0A1) = yOffset;
+
         // joypad controls
         UBYTE j = joypad(); // FIXME: is there a reason for this?
 
@@ -472,7 +482,7 @@ int main()
         }
         if(j & J_LEFT){
             player.x -= 1;
-            if(has_collision(player.x-8u, player.y) || has_collision(player.x-8u, player.y+8u)){
+            if(has_collision(get_tile_x(player.x), get_tile_y(player.y)) || has_collision(get_tile_x(player.x), get_tile_y(player.y)+1u)){
                 player.x +=1;
             }
             if (facing != -1)
@@ -483,7 +493,7 @@ int main()
         }
         if(j & J_RIGHT){
             player.x += 1;
-            if(has_collision(player.x+8u, player.y) || has_collision(player.x+8u, player.y+8u)){
+            if(has_collision(get_tile_x(player.x)+1u, get_tile_y(player.y)) || has_collision(get_tile_x(player.x)+1u, get_tile_y(player.y)+1u)){
                 player.x -=1;
             }
             if (facing != 1)
