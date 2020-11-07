@@ -1,6 +1,6 @@
 /*
 
- TESTTILESET.H
+ FANTASYTILESET.H
 
  Include File.
 
@@ -24,8 +24,8 @@
 
 
 /* Bank of tiles. */
-#define TestTilesetBank 0
+#define FantasyTilesetBank 0
 /* Start of tile array. */
-extern unsigned char TestTileset[];
+extern unsigned char FantasyTileset[];
 
-/* End of TESTTILESET.H */
+/* End of FANTASYTILESET.H */

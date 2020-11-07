@@ -7,10 +7,22 @@
 #include <stdio.h>
 
 // Graphics
+// Sprites
 #include "gfx/playerSprites.c"
-#include "gfx/TestTileset.c"
-#include "gfx/TestMap.c"
-#include "gfx/Level1Map.c"
+#include "gfx/Monster1.c"
+// Tiles
+#include "gfx/FantasyTileset.c"
+#include "gfx/MotherboardTileset.c"
+// Maps
+#include "gfx/MapLevel1_1.c"
+#include "gfx/MapLevel1_1edge.c"
+#include "gfx/MapLevel1_2.c"
+#include "gfx/MapLevel2_1.c"
+#include "gfx/MapLevel2_2.c"
+#include "gfx/MapLevel3_1.c"
+#include "gfx/MapLevel3_2.c"
+#include "gfx/MapLevel4.c"
+
 // TODO: Split generic functions into separate header files eventually?
 
 // Engine related variables
@@ -290,25 +302,29 @@ void load_map(UINT8 mapId)
 {
     switch (mapId)
     {
-    case 0:
-        // test map
-        set_bkg_data(0, 46, TestTileset);
-        set_bkg_tiles(0, 0, 20, 18, TestMap);
-        currentMap = TestMap;
-        currentTileSet = TestTileset;
+    case 11:
+        // level 1-1
+        scroll_bkg(-8*xOffset,0);
+        xOffset = 0;
+        set_bkg_data(0, 46, FantasyTileset);
+        set_bkg_tiles(0, 0, 40, 18, MapLevel1_1);
+        currentMap = MapLevel1_1;
+        currentTileSet = FantasyTileset;
         currentCollisionTileCutoff = 7;
-        currentMapHeight = TestMapHeight;
-        currentMapWidth = TestMapWidth;
+        currentMapHeight = MapLevel1_1Height;
+        currentMapWidth = MapLevel1_1Width;
         break;
-    case 1:
-        // level 1
-        set_bkg_data(0, 46, TestTileset);
-        set_bkg_tiles(0, 0, 40, 18, Level1Map);
-        currentMap = Level1Map;
-        currentTileSet = TestTileset;
+    case 12:
+        // level 1-2
+        scroll_bkg(-8*xOffset,0);
+        xOffset = 0;
+        set_bkg_data(0, 46, FantasyTileset);
+        set_bkg_tiles(0, 0, 40, 18, MapLevel1_2);
+        currentMap = MapLevel1_2;
+        currentTileSet = FantasyTileset;
         currentCollisionTileCutoff = 7;
-        currentMapHeight = Level1MapHeight;
-        currentMapWidth = Level1MapWidth;
+        currentMapHeight = MapLevel1_2Height;
+        currentMapWidth = MapLevel1_2Width;
     default:
         break;
     }
@@ -354,18 +370,6 @@ UINT8 get_tile_x(UINT8 x){
 UINT8 get_tile_y(UINT8 y){
     return (y-16u)/8u +yOffset;
 }
-
-//new collision block
-
-/*BOOLEAN has_collision(UINT8 x, UINT8 y){
-    UINT16 tileindexTL = currentMapWidth * get_tile_y(y) + get_tile_x(x);
-    if ((UBYTE) currentMap[tileindexTL] < currentCollisionTileCutoff )
-
-        return TRUE;
-
-    return FALSE;
-
-}*/
 
 BOOLEAN has_collision(UINT8 tile_x, UINT8 tile_y){
     UINT16 tileindexTL = currentMapWidth * tile_y + tile_x;
@@ -430,8 +434,6 @@ void setup_player()
     set_sprite_data(0, 31, playerSprites);
     player.height = 16;
     player.width = 8;
-    //player.x = 8; // placeholder
-    //player.y = 96; // placeholder
     xOffset = 0;
     yOffset = 0;
     player.animationLength = 2;
@@ -452,7 +454,7 @@ void setup_player()
 void setup_game()
 {
     setup_player();
-    load_map(0);
+    load_map(11);
     SHOW_SPRITES;
     SHOW_BKG;
     DISPLAY_ON;
@@ -470,9 +472,7 @@ int main()
     while(gameRunning)
     {
 
-        //printf("adfa");
-        *((UINT8*)0xC080) = has_collision(0x13*8 + 8, 0x08*8 + 16);
-        //*((UINT8*)0xC0A1) = yOffset;
+        // FIXME: delete this before shipping the game *((UINT8*)0xC080) = has_collision(0x13*8 + 8, 0x08*8 + 16);
 
         // joypad controls
         UBYTE j = joypad(); // FIXME: is there a reason for this?
@@ -518,16 +518,18 @@ int main()
             ++advanceAnimation;
         }
 
-        // Reached right end of screen
-        if (player.x > 168 && player.y > 48 && player.y < 88)
+        // Screen scrolling
+        if (player.x > 154)
         {
-            change_map(1);
-            move_player(8,96);
-        } else if (player.x > 154 && currentMap != TestMap)
+            set_bkg_tiles(0,0,8,18,MapLevel1_1edge);
+            //change_map(12);
+            //move_player(8,96);
+        } 
+        if (player.x > 154 /*&& xOffset < currentMapWidth - SCREENWIDTH/8 - 9*/)
         {
-            scroll_bkg(8,0);
-            move_player(player.x-8, player.y);
-            incr_player_offset(8,0);
+            scroll_bkg(32,0);
+            move_player(player.x-32, player.y);
+            incr_player_offset(32,0);
         }
         
 

@@ -1,6 +1,6 @@
 /*
 
- LEVEL1MAP.H
+ MAPLEVEL1_1.H
 
  Map Include File.
 
@@ -18,10 +18,10 @@
 
 */
 
-#define Level1MapWidth 40
-#define Level1MapHeight 18
-#define Level1MapBank 0
+#define MapLevel1_1Width 40
+#define MapLevel1_1Height 18
+#define MapLevel1_1Bank 0
 
-extern unsigned char Level1Map[];
+extern unsigned char MapLevel1_1[];
 
-/* End of LEVEL1MAP.H */
+/* End of MAPLEVEL1_1.H */
