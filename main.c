@@ -40,8 +40,9 @@ char* currentTileSet;
 UINT8 currentCollisionTileCutoff;
 UINT8 currentMapWidth;
 UINT8 currentMapHeight;
-UINT8 xOffset;
-UINT8 yOffset;
+UINT16 xOffset;
+UINT16 yOffset;
+BOOLEAN loaded;
 
 // Bigger sprite supporting struct
 struct GameObject 
@@ -304,7 +305,7 @@ void load_map(UINT8 mapId)
     {
     case 11:
         // level 1-1
-        scroll_bkg(-8*xOffset,0);
+        scroll_bkg(-xOffset,0);
         xOffset = 0;
         set_bkg_data(0, 46, FantasyTileset);
         set_bkg_tiles(0, 0, 40, 18, MapLevel1_1);
@@ -316,7 +317,7 @@ void load_map(UINT8 mapId)
         break;
     case 12:
         // level 1-2
-        scroll_bkg(-8*xOffset,0);
+        scroll_bkg(-xOffset,0);
         xOffset = 0;
         set_bkg_data(0, 46, FantasyTileset);
         set_bkg_tiles(0, 0, 40, 18, MapLevel1_2);
@@ -328,31 +329,33 @@ void load_map(UINT8 mapId)
     default:
         break;
     }
+
+    loaded = FALSE;
 }
 
 // Function to change player offset
 void set_player_offset(UINT8 x, UINT8 y)
 {
-    xOffset = x/8;
-    yOffset = y/8;
+    xOffset = x;
+    yOffset = y;
 }
 
 // Function to add to player ofset
 void incr_player_offset(INT8 x, INT8 y)
 {
-    xOffset += x/8;
-    yOffset += y/8;
+    xOffset += x;
+    yOffset += y;
 }
 
 // Get offset in pixels
 UINT8 get_x_offset()
 {
-    return xOffset*8;
+    return xOffset;
 }
 
 UINT8 get_y_offset()
 {
-    return yOffset*8;
+    return yOffset;
 }
 
 // function for changing maps, with cool fade effect
@@ -364,11 +367,11 @@ void change_map(UINT8 mapId)
 }
 
 UINT8 get_tile_x(UINT8 x){
-    return (x-8u)/8u +xOffset;
+    return (x-8u+xOffset)/8u;
 }
 
 UINT8 get_tile_y(UINT8 y){
-    return (y-16u)/8u +yOffset;
+    return (y-16u+yOffset)/8u;
 }
 
 BOOLEAN has_collision(UINT8 tile_x, UINT8 tile_y){
@@ -394,7 +397,8 @@ void fall()
 
     player.y = player.y - currentSpeedY;
 
-    if(has_collision(get_tile_x(player.x), get_tile_y(player.y)+2u) || has_collision(get_tile_x(player.x)+1u, get_tile_y(player.y)+2u)){ //collision down
+    //collision down
+    if(has_collision(get_tile_x(player.x), get_tile_y(player.y)+2u) || has_collision(get_tile_x(player.x)+1u, get_tile_y(player.y)+2u)){ 
         player.y = (get_tile_y(player.y)+2u)*8u - 16u + 16u;//last 16u is for coordinate offset
         airborne = 0u;
         currentSpeedY = 0u;
@@ -402,7 +406,8 @@ void fall()
     }
 
 
-    if(has_collision(get_tile_x(player.x), get_tile_y(player.y)) || has_collision(get_tile_x(player.x)+1u, get_tile_y(player.y))){ //collision up
+    //collision up
+    if(has_collision(get_tile_x(player.x), get_tile_y(player.y)) || has_collision(get_tile_x(player.x)+1u, get_tile_y(player.y))){ 
         player.y = get_tile_y(player.y)*8u +8u + 16u;//last 16u is for coordinate offset
         if(currentSpeedY < 0)
             currentSpeedY = 0;
@@ -462,6 +467,7 @@ void setup_game()
     gameRunning = 1;
     advanceAnimation = 0;
     fall_counter = 0;
+    loaded = FALSE;
 }
 
 int main()
@@ -474,6 +480,10 @@ int main()
 
         // FIXME: delete this before shipping the game *((UINT8*)0xC080) = has_collision(0x13*8 + 8, 0x08*8 + 16);
 
+
+        UINT16 oldx = player.x;
+        UINT16 oldy = player.y;
+
         // joypad controls
         UBYTE j = joypad(); // FIXME: is there a reason for this?
 
@@ -483,7 +493,7 @@ int main()
         if(j & J_LEFT){
             player.x -= 1;
             if(has_collision(get_tile_x(player.x), get_tile_y(player.y)) || has_collision(get_tile_x(player.x), get_tile_y(player.y)+1u)){
-                player.x +=1;
+                player.x += 1;
             }
             if (facing != -1)
             {
@@ -491,7 +501,7 @@ int main()
                 change_player_animation(2);
             }
         }
-        if(j & J_RIGHT){
+        if(j & J_RIGHT) {
             player.x += 1;
             if(has_collision(get_tile_x(player.x)+1u, get_tile_y(player.y)) || has_collision(get_tile_x(player.x)+1u, get_tile_y(player.y)+1u)){
                 player.x -=1;
@@ -505,8 +515,28 @@ int main()
         
         fall();
 
+        //Check if need to scroll
+        if (!(player.x+xOffset < SCREENWIDTH/2 || player.x+xOffset > currentMapWidth*8 - SCREENWIDTH/2)){ 
+            scroll_bkg((INT16)player.x - oldx, 0);
+            xOffset+=(INT16)player.x - oldx;
+            player.x = SCREENWIDTH/2;
+        }
+
+        if (!(player.y+yOffset < SCREENHEIGHT/2 + 8 || player.y+yOffset > currentMapHeight*8 - (SCREENHEIGHT/2 + 8))){
+            scroll_bkg(0, (INT16)player.y - oldy);
+            yOffset+=(INT16)player.y - oldy;
+            player.y = SCREENHEIGHT/2 - 8;
+        }
+
         move_player(player.x, player.y);
         
+        /*
+        //check if need to load different tiles
+        if((player.x+xOffset)/8 >= 21 && !loaded){ //can be done more dynamicly to allow for bigger maps
+            set_bkg_tiles(0,0,8,18,MapLevel1_1+32*18);
+            loaded = TRUE;
+        }
+        */
 
         // Animation
         if(advanceAnimation == 2)
@@ -519,18 +549,18 @@ int main()
         }
 
         // Screen scrolling
-        if (player.x > 154)
-        {
-            set_bkg_tiles(0,0,8,18,MapLevel1_1edge);
+        //if (player.x > 154)
+        //{
+            //set_bkg_tiles(0,0,8,18,MapLevel1_1edge);
             //change_map(12);
             //move_player(8,96);
-        } 
-        if (player.x > 154 /*&& xOffset < currentMapWidth - SCREENWIDTH/8 - 9*/)
-        {
-            scroll_bkg(32,0);
-            move_player(player.x-32, player.y);
-            incr_player_offset(32,0);
-        }
+        //} 
+        //if (player.x > SCREENWIDTH/2 && xOffset < currentMapWidth - SCREENWIDTH/8 - 9)
+        //{
+            //scroll_bkg(2,0);
+            //move_player(player.x-2, player.y);
+            //incr_player_offset(2,0);
+        //}
         
 
         // end of game tick, delay
