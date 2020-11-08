@@ -362,6 +362,11 @@ UINT8 get_y_offset()
 // function for changing maps, with cool fade effect
 void change_map(UINT8 mapId)
 {
+    NR10_REG = 0x75;
+    NR11_REG = 0xC7;
+    NR12_REG = 0x50;
+    NR13_REG = 0x83;
+    NR14_REG = 0xC6;
     fadeout(5);
     load_map(mapId);
     fadein(5);
