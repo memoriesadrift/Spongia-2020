@@ -422,6 +422,11 @@ void jump()
     {
         airborne=1;
         currentSpeedY = 7;
+        NR10_REG = 0x44;
+        NR11_REG = 0x81;
+        NR12_REG = 0x41;
+        NR13_REG = 0x83;
+        NR14_REG = 0xC6;
     }
 }
 
@@ -453,15 +458,19 @@ void setup_player()
 void setup_game()
 {
     setup_player();
-    load_map(11);
-    SHOW_SPRITES;
-    SHOW_BKG;
-    DISPLAY_ON;
+    load_map(11);   
     gravity = -3;
     gameRunning = 1;
     advanceAnimation = 0;
     fall_counter = 0;
     loaded = FALSE;
+
+    NR52_REG = 0x80;
+    NR50_REG = 0x77;
+    NR51_REG = 0xFF;
+    SHOW_SPRITES;
+    SHOW_BKG;
+    DISPLAY_ON;
 }
 
 int main()
