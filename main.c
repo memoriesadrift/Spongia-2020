@@ -530,13 +530,16 @@ int main()
 
         move_player(player.x, player.y);
         
-        /*
+    
         //check if need to load different tiles
         if((player.x+xOffset)/8 >= 21 && !loaded){ //can be done more dynamicly to allow for bigger maps
-            set_bkg_tiles(0,0,8,18,MapLevel1_1+32*18);
+            //TODO: somehow do this for different maps
+            for(UINT8 i = 0; i < 18; ++i){
+                set_bkg_tiles(0,i,8,1,MapLevel1_1+40*i + 32);
+            }
             loaded = TRUE;
         }
-        */
+        
 
         // Animation
         if(advanceAnimation == 2)
