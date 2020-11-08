@@ -301,6 +301,7 @@ void advance_player_animation()
 // generic function for loading maps
 void load_map(UINT8 mapId)
 {
+    // TODO: Implement all maps
     switch (mapId)
     {
     case 11:
@@ -419,13 +420,6 @@ void jump()
 {
     if(airborne==0)
     {
-        if (facing = -1)
-        {
-            change_player_animation(4);
-        }else
-        {
-            change_player_animation(5);
-        }
         airborne=1;
         currentSpeedY = 7;
     }
@@ -477,10 +471,6 @@ int main()
 
     while(gameRunning)
     {
-
-        // FIXME: delete this before shipping the game *((UINT8*)0xC080) = has_collision(0x13*8 + 8, 0x08*8 + 16);
-
-
         UINT16 oldx = player.x;
         UINT16 oldy = player.y;
 
