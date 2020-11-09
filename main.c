@@ -1,15 +1,13 @@
-// FIXME: implement x-axis collision, currently, if the player walks into a block from the side, it won't count as a collision
-// TODO: fix jumping animation! dont want it to loop while jumping as it is now
-// TODO: add "standing facing left/right" animation - detection for if player is currently moving or not
+// TODO: Sprite flip
 
 // Generic Includes
 #include <gb/gb.h>
-#include <stdio.h>
+#include <stdio.h> //TODO: delete me!
 
 // Graphics
 // Sprites
 #include "gfx/playerSprites.c"
-#include "gfx/Monster1.c"
+//#include "gfx/Monster1.c"
 // Tiles
 #include "gfx/FantasyTileset.c"
 #include "gfx/MotherboardTileset.c"
@@ -21,17 +19,15 @@
 #include "gfx/MapLevel2_2.c"
 #include "gfx/MapLevel3_1.c"
 #include "gfx/MapLevel3_2.c"
-#include "gfx/MapLevel4.c"
-
-// TODO: Split generic functions into separate header files eventually?
+#include "gfx/MapLevel5_20x18.c"
+#include "gfx/MapLevel6_32x18.c"
 
 // Engine related variables
 BYTE gameRunning;
-const UINT8 tileSize = 8; // FIXME: doesn't work as #define TILESIZE 8 in move_sprite() function call - why?
+const UINT8 tileSize = 8;
 UBYTE advanceAnimation; // player animation is 50% slower than game ticks, at the moment so we have to advance the animation every other tick
 
 UINT8 i8; // for loop variable for reusable code - less memory needed to be allocated
-UINT8 j8; // same as above, but for nested for loops
 UINT8 level; // tracks which level the player is in, for map loading and game flow
 
 // Map variables
@@ -43,6 +39,7 @@ UINT8 currentMapHeight;
 UINT16 xOffset;
 UINT16 yOffset;
 BOOLEAN loaded;
+BOOLEAN facing; // 0 right 1 left
 
 // Bigger sprite supporting struct
 struct GameObject 
@@ -231,15 +228,11 @@ void scroll_player(INT8 x, INT8 y)
 // function to change animation type dynamically
 void change_player_animation(UINT8 type)
 {
+    // FIXME: this needs reworking with new sprite numbers and flipping doesnt work...
     player.animationType = type;
     // choose appropriate sprite id based on animation type
     switch (player.animationType)
         {
-        case 0:
-            // idle left
-            player.spritenos[0] = 6;
-            player.spritenos[1] = 7;
-            break;
         case 1:
             // idle right
             player.spritenos[0] = 0;
@@ -247,36 +240,30 @@ void change_player_animation(UINT8 type)
             break;
         case 2:
             // walk left
-            player.spritenos[0] = 18;
-            player.spritenos[1] = 19;
+            if(!facing)
+            {
+                facing = 1;
+                set_sprite_prop(player.spritenos[0], S_FLIPX);
+                set_sprite_prop(player.spritenos[1], S_FLIPX);
+            }
+            player.spritenos[0] = 12;
+            player.spritenos[1] = 13;
+
             break;
         case 3:
             // walk right
+            if(facing)
+            {
+                facing = 0;
+                set_sprite_prop(player.spritenos[0], S_FLIPX);
+                set_sprite_prop(player.spritenos[1], S_FLIPX);
+            }
             player.spritenos[0] = 12;
             player.spritenos[1] = 13;
             break;
-        case 4:
-            // jump left
-            // warning, this animation is 2 frames not 3!
-            player.spritenos[0] = 28;
-            player.spritenos[1] = 29;
-        case 5:
-            // jump right
-            // warning, this animation is 2 frames not 3!
-            player.spritenos[0] = 24;
-            player.spritenos[1] = 25;
         default:
             break;
         }
-    // change the player's animation length according to what's going on
-    if (player.animationType > 3)
-    {
-        player.animationLength = 1;
-    } else
-    {
-        player.animationLength = 2;
-    }
-    
 }
 
 // player animate function
@@ -327,6 +314,79 @@ void load_map(UINT8 mapId)
         currentCollisionTileCutoff = 7;
         currentMapHeight = MapLevel1_2Height;
         currentMapWidth = MapLevel1_2Width;
+        break;
+    case 21:
+        // level 21
+        scroll_bkg(-xOffset,0);
+        xOffset = 0;
+        set_bkg_data(0, 49, MotherboardTileset);
+        set_bkg_tiles(0, 0, 40, 18, MapLevel2_1);
+        currentMap = MapLevel2_1;
+        currentTileSet = MotherboardTileset;
+        currentCollisionTileCutoff = 10;
+        currentMapHeight = MapLevel2_1Height;
+        currentMapWidth = MapLevel2_1Width;
+        break;
+    case 22:
+        // level 21
+        scroll_bkg(-xOffset,0);
+        xOffset = 0;
+        set_bkg_data(0, 49, MotherboardTileset);
+        set_bkg_tiles(0, 0, 40, 18, MapLevel2_2);
+        currentMap = MapLevel2_2;
+        currentTileSet = MotherboardTileset;
+        currentCollisionTileCutoff = 10;
+        currentMapHeight = MapLevel2_2Height;
+        currentMapWidth = MapLevel2_2Width;
+        break;
+    case 31:
+        // level 21
+        scroll_bkg(-xOffset,0);
+        xOffset = 0;
+        set_bkg_data(0, 49, MotherboardTileset);
+        set_bkg_tiles(0, 0, 40, 18, MapLevel3_1);
+        currentMap = MapLevel3_1;
+        currentTileSet = MotherboardTileset;
+        currentCollisionTileCutoff = 10;
+        currentMapHeight = MapLevel3_1Height;
+        currentMapWidth = MapLevel3_1Width;
+        break;
+    case 32:
+        // level 21
+        scroll_bkg(-xOffset,0);
+        xOffset = 0;
+        set_bkg_data(0, 49, MotherboardTileset);
+        set_bkg_tiles(0, 0, 40, 18, MapLevel3_2);
+        currentMap = MapLevel3_2;
+        currentTileSet = MotherboardTileset;
+        currentCollisionTileCutoff = 10;
+        currentMapHeight = MapLevel3_2Height;
+        currentMapWidth = MapLevel3_2Width;
+        break;
+    case 5:
+        // level 5
+        scroll_bkg(-xOffset,0);
+        xOffset = 0;
+        set_bkg_data(0, 49, MotherboardTileset);
+        set_bkg_tiles(0, 0, 20, 18, MapLevel5_20x18);
+        currentMap = MapLevel5_20x18;
+        currentTileSet = MotherboardTileset;
+        currentCollisionTileCutoff = 10;
+        currentMapHeight = MapLevel5_20x18Height;
+        currentMapWidth = MapLevel5_20x18Width;
+        break;
+    case 6:
+        // level 6
+        scroll_bkg(-xOffset,0);
+        xOffset = 0;
+        set_bkg_data(0, 49, FantasyTileset);
+        set_bkg_tiles(0, 0, 32, 18, MapLevel6_32x18);
+        currentMap = MapLevel6_32x18;
+        currentTileSet = FantasyTileset;
+        currentCollisionTileCutoff = 7;
+        currentMapHeight = MapLevel6_32x18Height;
+        currentMapWidth = MapLevel6_32x18Width;
+        break;
     default:
         break;
     }
@@ -398,8 +458,8 @@ void fall()
         fall_counter = 0;
         
 
-    if (currentSpeedY < -7)
-        currentSpeedY = -7;
+    if (currentSpeedY < -7 * (-gravity/3))
+        currentSpeedY = -7 * (-gravity/3);
 
     player.y = player.y - currentSpeedY;
 
@@ -426,7 +486,7 @@ void jump()
     if(airborne==0)
     {
         airborne=1;
-        currentSpeedY = 7;
+        currentSpeedY = 7 * (-gravity/3);
         NR10_REG = 0x44;
         NR11_REG = 0x81;
         NR12_REG = 0x41;
@@ -482,7 +542,6 @@ int main()
 {
     setup_game();
     move_player(8, 96);
-
     while(gameRunning)
     {
         UINT16 oldx = player.x;
@@ -516,6 +575,12 @@ int main()
                 change_player_animation(3);
             }
         }
+
+        if(j & J_B)
+        {
+            printf("x: %u\n", player.x);
+            printf("y: %u", player.y);
+        }
         
         fall();
 
@@ -539,9 +604,42 @@ int main()
         if((player.x+xOffset)/8 >= 21 && !loaded){ //can be done more dynamicly to allow for bigger maps
             //TODO: somehow do this for different maps
             for(UINT8 i = 0; i < 18; ++i){
-                set_bkg_tiles(0,i,8,1,MapLevel1_1+40*i + 32);
+                set_bkg_tiles(0,i,8,1,currentMap+40*i + 32);
             }
             loaded = TRUE;
+        }
+
+        if(currentMap == MapLevel1_1 && player.x > 160 && player.y < 70)
+        {
+            change_map(12);
+            move_player(8,24);
+        }
+        //if(currentMap == MapLevel1_2 && player.x+xOffset > 15+xOffset && player.y == 14+yOffset) // FIXME: THIS DOESNT WORK!
+        if(j & J_START)
+        {
+            /*
+            //TODO: Fix upside down gravity
+            change_map(21);
+            move_player(8,36);
+            gravity = 3;
+            */
+           change_map(31);
+           move_player(8,136);
+        }
+        if (currentMap == MapLevel3_1 && player.x > 160 && player.y < 70)
+        {
+            change_map(32);
+            move_player(8, player.y);
+        }
+        if (currentMap == MapLevel3_2 && player.x > 160 && player.y < 50)
+        {
+            change_map(5);
+            move_player(48,114);
+        }
+        if(currentMap == MapLevel5_20x18 && (j & J_A))
+        {
+            change_map(6);
+            move_player(15 * 8 +8, 13 * 8 + 16);
         }
         
 
@@ -554,22 +652,7 @@ int main()
         {
             ++advanceAnimation;
         }
-
-        // Screen scrolling
-        //if (player.x > 154)
-        //{
-            //set_bkg_tiles(0,0,8,18,MapLevel1_1edge);
-            //change_map(12);
-            //move_player(8,96);
-        //} 
-        //if (player.x > SCREENWIDTH/2 && xOffset < currentMapWidth - SCREENWIDTH/8 - 9)
-        //{
-            //scroll_bkg(2,0);
-            //move_player(player.x-2, player.y);
-            //incr_player_offset(2,0);
-        //}
         
-
         // end of game tick, delay
         efficient_wait(2);
     }
