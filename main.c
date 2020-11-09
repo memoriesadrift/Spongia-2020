@@ -4,6 +4,8 @@
     Many lines, handle it!
 */
 
+// TODO: Sam, add splash screens
+
 // Generic Includes
 #include <gb/gb.h>
 
@@ -595,7 +597,7 @@ int main()
         
     
         //check if need to load different tiles
-        if((player.x+xOffset)/8 >= 21 && !loaded){ //can be done more dynamicly to allow for bigger maps
+        if((player.x+xOffset)/8 >= 21 && !loaded && currentMap != MapLevel6_32x18){ //can be done more dynamicly to allow for bigger maps
             for(UINT8 i = 0; i < 18; ++i){
                 set_bkg_tiles(0,i,8,1,currentMap+40*i + 32);
             }
