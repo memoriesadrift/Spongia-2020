@@ -1,13 +1,13 @@
 /*
 
- MAPLEVEL4.H
+ MAPLEVEL5_20X18.H
 
  Map Include File.
 
  Info:
    Section       : 
    Bank          : 0
-   Map size      : 40 x 18
+   Map size      : 20 x 18
    Tile set      : E:\Dokumenty\Škola\Spongia2020\tilesets\MotherboardTileset.gbr
    Plane count   : 1 plane (8 bits)
    Plane order   : Tiles are continues
@@ -18,10 +18,10 @@
 
 */
 
-#define MapLevel4Width 40
-#define MapLevel4Height 18
-#define MapLevel4Bank 0
+#define MapLevel5_20x18Width 20
+#define MapLevel5_20x18Height 18
+#define MapLevel5_20x18Bank 0
 
-extern unsigned char MapLevel4[];
+extern unsigned char MapLevel5_20x18[];
 
-/* End of MAPLEVEL4.H */
+/* End of MAPLEVEL5_20X18.H */
