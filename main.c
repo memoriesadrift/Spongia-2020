@@ -2,7 +2,6 @@
 
 // Generic Includes
 #include <gb/gb.h>
-#include <stdio.h> //TODO: delete me!
 
 // Graphics
 // Sprites
@@ -13,7 +12,6 @@
 #include "gfx/MotherboardTileset.c"
 // Maps
 #include "gfx/MapLevel1_1.c"
-#include "gfx/MapLevel1_1edge.c"
 #include "gfx/MapLevel1_2.c"
 #include "gfx/MapLevel2_1.c"
 #include "gfx/MapLevel2_2.c"
@@ -53,14 +51,13 @@ struct GameObject
     UINT8 animationLength; // 1 - 2 frames, 2 - 3 frames
     UINT8 animationStep;
     UINT8 animationType; //0 - idle left, 1 - idle right, 2 - walk left, 3 - walk right, 4 - jump left, 5 - jump right 
-    // TODO: introduce constants for player animation types and lengths
 };
 
 // Player vars
 struct GameObject player;
 BYTE facing;
 BYTE airborne;
-INT8 gravity; // FIXME: const?
+INT8 gravity;
 INT16 currentSpeedY;
 UBYTE fall_counter;
 
@@ -448,6 +445,7 @@ BOOLEAN has_collision(UINT8 tile_x, UINT8 tile_y){
     return FALSE;
 }
 
+//TODO: Michal: Fix upside down gravity, test on levels 2_1 and 2_2, commands: change_map(21) and 22
 // Function for falling
 void fall()
 {
@@ -548,7 +546,7 @@ int main()
         UINT16 oldy = player.y;
 
         // joypad controls
-        UBYTE j = joypad(); // FIXME: is there a reason for this?
+        UBYTE j = joypad();
 
         if(j & J_A && !airborne){
             jump();
@@ -575,12 +573,6 @@ int main()
                 change_player_animation(3);
             }
         }
-
-        if(j & J_B)
-        {
-            printf("x: %u\n", player.x);
-            printf("y: %u", player.y);
-        }
         
         fall();
 
@@ -602,29 +594,51 @@ int main()
     
         //check if need to load different tiles
         if((player.x+xOffset)/8 >= 21 && !loaded){ //can be done more dynamicly to allow for bigger maps
-            //TODO: somehow do this for different maps
             for(UINT8 i = 0; i < 18; ++i){
                 set_bkg_tiles(0,i,8,1,currentMap+40*i + 32);
             }
             loaded = TRUE;
         }
 
+        // Map Changing
+
         if(currentMap == MapLevel1_1 && player.x > 160 && player.y < 70)
         {
             change_map(12);
             move_player(8,24);
         }
-        //if(currentMap == MapLevel1_2 && player.x+xOffset > 15+xOffset && player.y == 14+yOffset) // FIXME: THIS DOESNT WORK!
-        if(j & J_START)
+
+        //if(currentMap == MapLevel1_2 && player.x+xOffset > 15+xOffset && player.y == 14+yOffset) // FIXME: Michal: fix map change here
+        // We have to basically create a sprite at this location that when touched will move the player back and then change its sprite to the gameboy
+        // if you get it to work when the player walks into the spot shown in the discord picture of th emap in #fileuploads i will do the sprite work
+        // 
+        if(j & J_START) // Debug
         {
             /*
-            //TODO: Fix upside down gravity
+            //TODO: Michal: Fix upside down gravity
             change_map(21);
             move_player(8,36);
             gravity = 3;
             */
+           // then delete this and uncomment the top commands
            change_map(31);
            move_player(8,136);
+        }
+        //TODO: Sam, tweak numbers if necessary
+        if (currentMap == MapLevel2_1 && player.x > 160 && player.y > 110)
+        {
+            change_map(22);
+            move_player(8, 136);
+        }
+
+        if (currentMap == MapLevel2_2 && player.x == 22 * 8 +8 && player.y == 4 * 8 + 16) // TODO: Sam, rework to sprite collision, same as 1_2
+        {
+            gravity = -3;
+        }
+        if (currentMap == MapLevel2_2 && player.x > 160 && player.y < 70)
+        {
+            change_map(31);
+            move_player(8,136);
         }
         if (currentMap == MapLevel3_1 && player.x > 160 && player.y < 70)
         {
@@ -633,6 +647,7 @@ int main()
         }
         if (currentMap == MapLevel3_2 && player.x > 160 && player.y < 50)
         {
+            // TODO: maybe add something here? currently the game is won by pressing the A button
             change_map(5);
             move_player(48,114);
         }
@@ -640,6 +655,7 @@ int main()
         {
             change_map(6);
             move_player(15 * 8 +8, 13 * 8 + 16);
+            // Game is over at this point
         }
         
 
