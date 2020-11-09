@@ -4,8 +4,6 @@
     Many lines, handle it!
 */
 
-// TODO: Sam, add splash screens
-
 // Generic Includes
 #include <gb/gb.h>
 #include <stdio.h>
@@ -232,7 +230,6 @@ void scroll_player(INT8 x, INT8 y)
 // function to change animation type dynamically
 void change_player_animation(UINT8 type)
 {
-    // FIXME: Michal: this needs reworking with new sprite numbers and flipping doesnt work...
     player.animationType = type;
     // choose appropriate sprite id based on animation type
     switch (player.animationType)
@@ -668,16 +665,13 @@ int main()
 
         // Map Changing
 
-        if(currentMap == MapLevel1_1 && player.x > 160 && player.y < 70)
+        if(currentMap == MapLevel1_1 && player.x > 160 && player.y < 100)
         {
             change_map(12);
             move_player(8,24);
         }
 
         if(currentMap == MapLevel1_2 && get_tile_x(player.x) == 32 && get_tile_y(player.y) == 11){
-        // We have to basically create a sprite at this location that when touched will move the player back and then change its sprite to the gameboy
-        // if you get it to work when the player walks into the spot shown in the discord picture of th emap in #fileuploads i will do the sprite work
-        // 
             change_map(21);
             move_player(0u*8u+8u,1u*8u+16u);
             flipped = TRUE;
