@@ -13,7 +13,7 @@
 // Graphics
 // Sprites
 #include "gfx/playerSprites.c"
-//#include "gfx/Monster1.c"
+#include "gfx/Monster.c"
 // Tiles
 #include "gfx/FantasyTileset.c"
 #include "gfx/MotherboardTileset.c"
@@ -69,6 +69,8 @@ INT8 gravity;
 INT16 currentSpeedY;
 UBYTE fall_counter;
 
+// Monster vars
+struct GameObject monster;
 
 //fucntion declarations
 
@@ -297,17 +299,27 @@ void change_player_animation(UINT8 type)
 void advance_player_animation()
 {
     ++player.animationStep;
+    ++monster.animationStep;
     // Reset sprite to the starting point
     if (player.animationStep > player.animationLength)
     {
         change_player_animation(player.animationType);
         player.animationStep = 0;
+
+        monster.spritenos[0] = 13;
+        monster.spritenos[1] = 14;
+        monster.animationStep = 0;
     } else
     {
         player.spritenos[0] += 2u;
         player.spritenos[1] += 2u;
+
+        monster.spritenos[0] += 2u;
+        monster.spritenos[1] += 2u;
     }
     
+    set_sprite_tile(monster.spriteids[0], monster.spritenos[0]);
+    set_sprite_tile(monster.spriteids[1], monster.spritenos[1]);
     set_sprite_tile(player.spriteids[0], player.spritenos[0]);
     set_sprite_tile(player.spriteids[1], player.spritenos[1]);
 }
@@ -469,6 +481,10 @@ BOOLEAN has_collision(UINT8 tile_x, UINT8 tile_y){
     return FALSE;
 }
 
+BOOLEAN has_sprite_collision(struct GameObject* one, struct GameObject* two){
+    return (one->x >= two->x && one->x <= two->x + two->width) && (one->y >= two->y && one->y <= two->y + two->height) || (two->x >= one->x && two->x <= one->x + one->width) && (two->y >= one->y && two->y <= one->y + one->height);
+}
+
 //TODO: Michal: Fix upside down gravity, test on levels 2_1 and 2_2, commands: change_map(21) and 22
 // Function for falling
 void fall()
@@ -553,7 +569,7 @@ void jump()
 
 void setup_player()
 {
-    set_sprite_data(0, 31, playerSprites);
+    set_sprite_data(0, 12, playerSprites);
     player.height = 16;
     player.width = 8;
     xOffset = 0;
@@ -571,12 +587,29 @@ void setup_player()
     facing = 1;
 }
 
+void setup_monster()
+{
+    set_sprite_data(13, 6, Monster);
+    monster.x = 32;
+    monster.y = 96;
+    monster.height = 16;
+    monster.width = 8;
+    monster.animationLength = 1;
+    monster.spriteids[0] = 2;
+    monster.spriteids[1] = 3;
+    monster.spritenos[0] = 13;
+    monster.spritenos[1] = 14;
+    set_sprite_tile(monster.spriteids[0], monster.spritenos[0]);
+    set_sprite_tile(monster.spriteids[1], monster.spritenos[1]);
+}
+
 // Function to setup game
 // to be called at the beginning of main
 // sets up bg, turns on display, etc.
 void setup_game()
 {
     setup_player();
+    setup_monster();
     load_map(11);   
     gravity = -3;
     gameRunning = 1;
@@ -597,6 +630,7 @@ int main()
 {
     setup_game();
     move_player(8, 96);
+    move_game_object(&monster, monster.x, monster.y);
     BOOLEAN idle = TRUE;
     while(gameRunning)
     {
@@ -684,7 +718,7 @@ int main()
             move_player(0u*8u+8u,1u*8u+16u);
             flipped = TRUE;
         }
-        //TODO: Sam, tweak numbers if necessary
+        
         if (currentMap == MapLevel2_1 && player.x > 160 && player.y > 110)
         {
             change_map(22);
@@ -708,12 +742,13 @@ int main()
         }
         if (currentMap == MapLevel3_2 && get_tile_x(player.x) == 28 && get_tile_y(player.y) == 4)
         {
-            // TODO: Sam, maybe add something here? currently the game is won by pressing the A button
+           HIDE_SPRITES;
             change_map(5);
             move_player(48,114);
         }
         if(currentMap == MapLevel5_20x18 && (j & J_A))
         {
+            SHOW_SPRITES;
             change_map(6);
             move_player(15u * 8u +8u, 13u * 8u + 16u);
             // Game is over at this point

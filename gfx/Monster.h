@@ -1,6 +1,6 @@
 /*
 
- MONSTER1.H
+ MONSTER.H
 
  Include File.
 
@@ -10,7 +10,7 @@
   Compression          : None.
   Counter              : None.
   Tile size            : 8 x 8
-  Tiles                : 0 to 17
+  Tiles                : 0 to 5
 
   Palette colors       : None.
   SGB Palette          : None.
@@ -24,8 +24,8 @@
 
 
 /* Bank of tiles. */
-#define Monster1Bank 0
+#define MonsterBank 0
 /* Start of tile array. */
-extern unsigned char Monster1[];
+extern unsigned char Monster[];
 
-/* End of MONSTER1.H */
+/* End of MONSTER.H */
