@@ -1,4 +1,8 @@
-// TODO: Sprite flip
+/*
+    Spongia 2020
+    CS Hustle
+    Many lines, handle it!
+*/
 
 // Generic Includes
 #include <gb/gb.h>
@@ -152,7 +156,6 @@ void scroll_game_object(struct GameObject* obj, INT8 movex, INT8 movey)
     // set new location in GameObject
     obj->x += movex;
     obj->y += movey;
-    // FIXME: Maybe make these update after every progress in the loop below?
 
     while(movex != 0 && movey != 0)
     {
@@ -225,7 +228,7 @@ void scroll_player(INT8 x, INT8 y)
 // function to change animation type dynamically
 void change_player_animation(UINT8 type)
 {
-    // FIXME: this needs reworking with new sprite numbers and flipping doesnt work...
+    // FIXME: Michal: this needs reworking with new sprite numbers and flipping doesnt work...
     player.animationType = type;
     // choose appropriate sprite id based on animation type
     switch (player.animationType)
@@ -285,7 +288,6 @@ void advance_player_animation()
 // generic function for loading maps
 void load_map(UINT8 mapId)
 {
-    // TODO: Implement all maps
     switch (mapId)
     {
     case 11:
@@ -573,7 +575,7 @@ int main()
                 change_player_animation(3);
             }
         }
-        
+
         fall();
 
         //Check if need to scroll
@@ -647,7 +649,7 @@ int main()
         }
         if (currentMap == MapLevel3_2 && player.x > 160 && player.y < 50)
         {
-            // TODO: maybe add something here? currently the game is won by pressing the A button
+            // TODO: Sam, maybe add something here? currently the game is won by pressing the A button
             change_map(5);
             move_player(48,114);
         }
