@@ -1,0 +1,7 @@
+Názov tímu: CS Hustle
+Názov hry: Glitch
+Vývojové prostredie a prostriedky: C, GBDK
+
+Knižnica GBDK
+https://github.com/Zal0/gbdk-2020
+Licencia: MIT Licence
