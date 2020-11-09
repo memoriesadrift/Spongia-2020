@@ -1,6 +1,6 @@
 /*
 
- PLAYERSPRITES.H
+ PLAYERSPRITES_COMPRE.H
 
  Include File.
 
@@ -10,7 +10,7 @@
   Compression          : None.
   Counter              : None.
   Tile size            : 8 x 8
-  Tiles                : 0 to 31
+  Tiles                : 0 to 13
 
   Palette colors       : None.
   SGB Palette          : None.
@@ -24,8 +24,8 @@
 
 
 /* Bank of tiles. */
-#define playerSpritesBank 0
+#define playerSprites_compreBank 0
 /* Start of tile array. */
 extern unsigned char playerSprites[];
 
-/* End of PLAYERSPRITES.H */
+/* End of PLAYERSPRITES_COMPRE.H */
