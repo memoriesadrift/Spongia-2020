@@ -69,9 +69,6 @@ INT8 gravity;
 INT16 currentSpeedY;
 UBYTE fall_counter;
 
-// Monster vars
-struct GameObject monster;
-
 //fucntion declarations
 
 
@@ -299,27 +296,16 @@ void change_player_animation(UINT8 type)
 void advance_player_animation()
 {
     ++player.animationStep;
-    ++monster.animationStep;
     // Reset sprite to the starting point
     if (player.animationStep > player.animationLength)
     {
         change_player_animation(player.animationType);
         player.animationStep = 0;
-
-        monster.spritenos[0] = 13;
-        monster.spritenos[1] = 14;
-        monster.animationStep = 0;
     } else
     {
         player.spritenos[0] += 2u;
         player.spritenos[1] += 2u;
-
-        monster.spritenos[0] += 2u;
-        monster.spritenos[1] += 2u;
     }
-    
-    set_sprite_tile(monster.spriteids[0], monster.spritenos[0]);
-    set_sprite_tile(monster.spriteids[1], monster.spritenos[1]);
     set_sprite_tile(player.spriteids[0], player.spritenos[0]);
     set_sprite_tile(player.spriteids[1], player.spritenos[1]);
 }
@@ -332,7 +318,7 @@ void load_map(UINT8 mapId)
     case 11:
         // level 1-1
         scroll_bkg(-xOffset,0);
-        set_bkg_data(0, 46, FantasyTileset);
+        set_bkg_data(0, 49, FantasyTileset);
         set_bkg_tiles(0, 0, 40, 18, MapLevel1_1);
         currentMap = MapLevel1_1;
         currentTileSet = FantasyTileset;
@@ -343,7 +329,7 @@ void load_map(UINT8 mapId)
     case 12:
         // level 1-2
         scroll_bkg(-xOffset,0);
-        set_bkg_data(0, 46, FantasyTileset);
+        set_bkg_data(0, 49, FantasyTileset);
         set_bkg_tiles(0, 0, 40, 18, MapLevel1_2);
         currentMap = MapLevel1_2;
         currentTileSet = FantasyTileset;
@@ -354,7 +340,7 @@ void load_map(UINT8 mapId)
     case 21:
         // level 21
         scroll_bkg(-xOffset,0);
-        set_bkg_data(0, 49, MotherboardTileset);
+        set_bkg_data(0, 53, MotherboardTileset);
         set_bkg_tiles(0, 0, 40, 18, MapLevel2_1);
         currentMap = MapLevel2_1;
         currentTileSet = MotherboardTileset;
@@ -365,7 +351,7 @@ void load_map(UINT8 mapId)
     case 22:
         // level 21
         scroll_bkg(-xOffset,0);
-        set_bkg_data(0, 49, MotherboardTileset);
+        set_bkg_data(0, 53, MotherboardTileset);
         set_bkg_tiles(0, 0, 40, 18, MapLevel2_2);
         currentMap = MapLevel2_2;
         currentTileSet = MotherboardTileset;
@@ -376,7 +362,7 @@ void load_map(UINT8 mapId)
     case 31:
         // level 21
         scroll_bkg(-xOffset,0);
-        set_bkg_data(0, 49, MotherboardTileset);
+        set_bkg_data(0, 53, MotherboardTileset);
         set_bkg_tiles(0, 0, 40, 18, MapLevel3_1);
         currentMap = MapLevel3_1;
         currentTileSet = MotherboardTileset;
@@ -387,7 +373,7 @@ void load_map(UINT8 mapId)
     case 32:
         // level 21
         scroll_bkg(-xOffset,0);
-        set_bkg_data(0, 49, MotherboardTileset);
+        set_bkg_data(0, 53, MotherboardTileset);
         set_bkg_tiles(0, 0, 40, 18, MapLevel3_2);
         currentMap = MapLevel3_2;
         currentTileSet = MotherboardTileset;
@@ -398,7 +384,7 @@ void load_map(UINT8 mapId)
     case 5:
         // level 5
         scroll_bkg(-xOffset,0);
-        set_bkg_data(0, 49, MotherboardTileset);
+        set_bkg_data(0, 53, MotherboardTileset);
         set_bkg_tiles(0, 0, 20, 18, MapLevel5_20x18);
         currentMap = MapLevel5_20x18;
         currentTileSet = MotherboardTileset;
@@ -481,11 +467,6 @@ BOOLEAN has_collision(UINT8 tile_x, UINT8 tile_y){
     return FALSE;
 }
 
-BOOLEAN has_sprite_collision(struct GameObject* one, struct GameObject* two){
-    return (one->x >= two->x && one->x <= two->x + two->width) && (one->y >= two->y && one->y <= two->y + two->height) || (two->x >= one->x && two->x <= one->x + one->width) && (two->y >= one->y && two->y <= one->y + one->height);
-}
-
-//TODO: Michal: Fix upside down gravity, test on levels 2_1 and 2_2, commands: change_map(21) and 22
 // Function for falling
 void fall()
 {
@@ -587,22 +568,6 @@ void setup_player()
     facing = 1;
 }
 
-void setup_monster()
-{
-    set_sprite_data(13, 6, Monster);
-    monster.x = 32;
-    monster.y = 96;
-    monster.height = 16;
-    monster.width = 8;
-    monster.animationLength = 1;
-    monster.spriteids[0] = 2;
-    monster.spriteids[1] = 3;
-    monster.spritenos[0] = 13;
-    monster.spritenos[1] = 14;
-    set_sprite_tile(monster.spriteids[0], monster.spritenos[0]);
-    set_sprite_tile(monster.spriteids[1], monster.spritenos[1]);
-}
-
 // Function to setup game
 // to be called at the beginning of main
 // sets up bg, turns on display, etc.
@@ -630,7 +595,6 @@ int main()
 {
     setup_game();
     move_player(8, 96);
-    move_game_object(&monster, monster.x, monster.y);
     BOOLEAN idle = TRUE;
     while(gameRunning)
     {
