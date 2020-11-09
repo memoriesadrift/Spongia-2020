@@ -17,7 +17,7 @@
 
 
 /* Bank of tiles. */
-#define playerSpritesBank 0
+#define playerSprites_compreBank 0
 /* Start of tile array. */
 extern unsigned char playerSprites[];
 

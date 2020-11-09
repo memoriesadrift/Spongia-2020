@@ -241,12 +241,12 @@ void change_player_animation(UINT8 type)
             // idle left
             player.spritenos[0] = 0;
             player.spritenos[1] = 1;
-            if(get_sprite_prop(player.spritenos[0]) == 0b00000000)
+            if(get_sprite_prop(player.spriteids[0]) == 0b00000000)
             {
-                set_sprite_prop(player.spritenos[0], S_FLIPX);
-                set_sprite_prop(player.spritenos[1], S_FLIPX);
-                set_sprite_prop(player.spritenos[0]+2, S_FLIPX);
-                set_sprite_prop(player.spritenos[1]+2, S_FLIPX);
+                set_sprite_prop(player.spriteids[0], S_FLIPX);
+                set_sprite_prop(player.spriteids[1], S_FLIPX);
+               // set_sprite_prop(player.spriteids[0]+2, S_FLIPX);
+              //  set_sprite_prop(player.spriteids[1]+2, S_FLIPX);
             }
             break;
 
@@ -254,24 +254,24 @@ void change_player_animation(UINT8 type)
             // idle right
             player.spritenos[0] = 0;
             player.spritenos[1] = 1;
-            if(get_sprite_prop(player.spritenos[0]) == 0b00100000)
+            if(get_sprite_prop(player.spriteids[0]) == 0b00100000)
             {
-                set_sprite_prop(player.spritenos[0], 0);
-                set_sprite_prop(player.spritenos[1], 0);
-                set_sprite_prop(player.spritenos[0]+2, 0);
-                set_sprite_prop(player.spritenos[1]+2, 0);
+                set_sprite_prop(player.spriteids[0], 0);
+                set_sprite_prop(player.spriteids[1], 0);
+               // set_sprite_prop(player.spriteids[0]+2, 0);
+               // set_sprite_prop(player.spriteids[1]+2, 0);
             }
             break;
         case 2:
             // walk left
             player.spritenos[0] = 4;
             player.spritenos[1] = 5;
-            if(get_sprite_prop(player.spritenos[0]) == 0b00000000)
+            if(!(get_sprite_prop(player.spriteids[0]) & S_FLIPX))
             {
-                set_sprite_prop(player.spritenos[0], S_FLIPX);
-                set_sprite_prop(player.spritenos[1], S_FLIPX);
-                set_sprite_prop(player.spritenos[0]+2, S_FLIPY);
-                set_sprite_prop(player.spritenos[1]+2, S_FLIPY);
+                set_sprite_prop(player.spriteids[0], S_FLIPX);
+                set_sprite_prop(player.spriteids[1], S_FLIPX);
+                //set_sprite_prop(player.spriteids[0]+2u, S_FLIPX);
+                //set_sprite_prop(player.spriteids[1]+2u, S_FLIPX);
             }
 
             break;
@@ -279,12 +279,12 @@ void change_player_animation(UINT8 type)
             // walk right
             player.spritenos[0] = 4;
             player.spritenos[1] = 5;
-            if(get_sprite_prop(player.spritenos[0]) == S_FLIPX)
+            if((get_sprite_prop(player.spriteids[0]) & S_FLIPX))
             {
-                set_sprite_prop(player.spritenos[0], 0);
-                set_sprite_prop(player.spritenos[1], 0);
-                set_sprite_prop(player.spritenos[0]+2, 0);
-                set_sprite_prop(player.spritenos[1]+2, 0);
+                set_sprite_prop(player.spriteids[0], 0);
+                set_sprite_prop(player.spriteids[1], 0);
+             //   set_sprite_prop(player.spriteids[0]+2u, 0);
+             //   set_sprite_prop(player.spriteids[1]+2u, 0);
             } 
             break;
         default:
@@ -565,7 +565,7 @@ void setup_player()
     set_sprite_tile(player.spriteids[0], player.spritenos[0]);
     set_sprite_tile(player.spriteids[1], player.spritenos[1]);
     airborne = 0;
-    facing = 1;
+    facing = 0;
 }
 
 // Function to setup game
@@ -614,8 +614,8 @@ int main()
             }
             if (facing == 0 || idle)
             {
-                facing = 1;
                 change_player_animation(2);
+                facing = 1;
             }
             idle = FALSE;
 
@@ -627,8 +627,8 @@ int main()
             }
             if (facing == 1 || idle)
             {
-                facing = 0;
                 change_player_animation(3);
+                facing = 0;
             }
             idle = FALSE;
         }
