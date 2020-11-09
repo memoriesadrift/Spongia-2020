@@ -242,26 +242,24 @@ void change_player_animation(UINT8 type)
             break;
         case 2:
             // walk left
-            if(!facing)
+            player.spritenos[0] = 4;
+            player.spritenos[1] = 5;
+            if(get_sprite_prop(player.spritenos[0]) == 0b00000000)
             {
-                facing = 1;
                 set_sprite_prop(player.spritenos[0], S_FLIPX);
                 set_sprite_prop(player.spritenos[1], S_FLIPX);
             }
-            player.spritenos[0] = 12;
-            player.spritenos[1] = 13;
 
             break;
         case 3:
             // walk right
-            if(facing)
+            player.spritenos[0] = 4;
+            player.spritenos[1] = 5;
+            if(get_sprite_prop(player.spritenos[0]) == 0b00100000)
             {
-                facing = 0;
                 set_sprite_prop(player.spritenos[0], S_FLIPX);
                 set_sprite_prop(player.spritenos[1], S_FLIPX);
-            }
-            player.spritenos[0] = 12;
-            player.spritenos[1] = 13;
+            } 
             break;
         default:
             break;
@@ -560,9 +558,9 @@ int main()
             if(has_collision(get_tile_x(player.x), get_tile_y(player.y)) || has_collision(get_tile_x(player.x), get_tile_y(player.y)+1u)){
                 player.x += 1;
             }
-            if (facing != -1)
+            if (facing != 0)
             {
-                facing = -1;
+                facing = 0;
                 change_player_animation(2);
             }
         }
