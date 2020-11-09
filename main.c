@@ -8,6 +8,7 @@
 
 // Generic Includes
 #include <gb/gb.h>
+#include <stdio.h>
 
 // Graphics
 // Sprites
@@ -44,6 +45,7 @@ UINT16 xOffset;
 UINT16 yOffset;
 BOOLEAN loaded;
 BOOLEAN facing; // 0 right 1 left
+BOOLEAN flipped;
 
 // Bigger sprite supporting struct
 struct GameObject 
@@ -219,6 +221,7 @@ void scroll_game_object(struct GameObject* obj, INT8 movex, INT8 movey)
 void move_player(UINT8 x, UINT8 y)
 {
     move_game_object(&player, x, y);
+
 }
 
 // Player scroll function
@@ -235,10 +238,30 @@ void change_player_animation(UINT8 type)
     // choose appropriate sprite id based on animation type
     switch (player.animationType)
         {
+        case 0:
+            // idle left
+            player.spritenos[0] = 0;
+            player.spritenos[1] = 1;
+            if(get_sprite_prop(player.spritenos[0]) == 0b00000000)
+            {
+                set_sprite_prop(player.spritenos[0], S_FLIPX);
+                set_sprite_prop(player.spritenos[1], S_FLIPX);
+                set_sprite_prop(player.spritenos[0]+2, S_FLIPX);
+                set_sprite_prop(player.spritenos[1]+2, S_FLIPX);
+            }
+            break;
+
         case 1:
             // idle right
             player.spritenos[0] = 0;
             player.spritenos[1] = 1;
+            if(get_sprite_prop(player.spritenos[0]) == 0b00100000)
+            {
+                set_sprite_prop(player.spritenos[0], 0);
+                set_sprite_prop(player.spritenos[1], 0);
+                set_sprite_prop(player.spritenos[0]+2, 0);
+                set_sprite_prop(player.spritenos[1]+2, 0);
+            }
             break;
         case 2:
             // walk left
@@ -248,6 +271,8 @@ void change_player_animation(UINT8 type)
             {
                 set_sprite_prop(player.spritenos[0], S_FLIPX);
                 set_sprite_prop(player.spritenos[1], S_FLIPX);
+                set_sprite_prop(player.spritenos[0]+2, S_FLIPY);
+                set_sprite_prop(player.spritenos[1]+2, S_FLIPY);
             }
 
             break;
@@ -255,10 +280,12 @@ void change_player_animation(UINT8 type)
             // walk right
             player.spritenos[0] = 4;
             player.spritenos[1] = 5;
-            if(get_sprite_prop(player.spritenos[0]) == 0b00100000)
+            if(get_sprite_prop(player.spritenos[0]) == S_FLIPX)
             {
-                set_sprite_prop(player.spritenos[0], S_FLIPX);
-                set_sprite_prop(player.spritenos[1], S_FLIPX);
+                set_sprite_prop(player.spritenos[0], 0);
+                set_sprite_prop(player.spritenos[1], 0);
+                set_sprite_prop(player.spritenos[0]+2, 0);
+                set_sprite_prop(player.spritenos[1]+2, 0);
             } 
             break;
         default:
@@ -277,8 +304,8 @@ void advance_player_animation()
         player.animationStep = 0;
     } else
     {
-        player.spritenos[0] += (UINT8)2;
-        player.spritenos[1] += (UINT8)2;
+        player.spritenos[0] += 2u;
+        player.spritenos[1] += 2u;
     }
     
     set_sprite_tile(player.spriteids[0], player.spritenos[0]);
@@ -293,7 +320,6 @@ void load_map(UINT8 mapId)
     case 11:
         // level 1-1
         scroll_bkg(-xOffset,0);
-        xOffset = 0;
         set_bkg_data(0, 46, FantasyTileset);
         set_bkg_tiles(0, 0, 40, 18, MapLevel1_1);
         currentMap = MapLevel1_1;
@@ -305,7 +331,6 @@ void load_map(UINT8 mapId)
     case 12:
         // level 1-2
         scroll_bkg(-xOffset,0);
-        xOffset = 0;
         set_bkg_data(0, 46, FantasyTileset);
         set_bkg_tiles(0, 0, 40, 18, MapLevel1_2);
         currentMap = MapLevel1_2;
@@ -317,7 +342,6 @@ void load_map(UINT8 mapId)
     case 21:
         // level 21
         scroll_bkg(-xOffset,0);
-        xOffset = 0;
         set_bkg_data(0, 49, MotherboardTileset);
         set_bkg_tiles(0, 0, 40, 18, MapLevel2_1);
         currentMap = MapLevel2_1;
@@ -329,7 +353,6 @@ void load_map(UINT8 mapId)
     case 22:
         // level 21
         scroll_bkg(-xOffset,0);
-        xOffset = 0;
         set_bkg_data(0, 49, MotherboardTileset);
         set_bkg_tiles(0, 0, 40, 18, MapLevel2_2);
         currentMap = MapLevel2_2;
@@ -341,7 +364,6 @@ void load_map(UINT8 mapId)
     case 31:
         // level 21
         scroll_bkg(-xOffset,0);
-        xOffset = 0;
         set_bkg_data(0, 49, MotherboardTileset);
         set_bkg_tiles(0, 0, 40, 18, MapLevel3_1);
         currentMap = MapLevel3_1;
@@ -353,7 +375,6 @@ void load_map(UINT8 mapId)
     case 32:
         // level 21
         scroll_bkg(-xOffset,0);
-        xOffset = 0;
         set_bkg_data(0, 49, MotherboardTileset);
         set_bkg_tiles(0, 0, 40, 18, MapLevel3_2);
         currentMap = MapLevel3_2;
@@ -365,7 +386,6 @@ void load_map(UINT8 mapId)
     case 5:
         // level 5
         scroll_bkg(-xOffset,0);
-        xOffset = 0;
         set_bkg_data(0, 49, MotherboardTileset);
         set_bkg_tiles(0, 0, 20, 18, MapLevel5_20x18);
         currentMap = MapLevel5_20x18;
@@ -377,7 +397,6 @@ void load_map(UINT8 mapId)
     case 6:
         // level 6
         scroll_bkg(-xOffset,0);
-        xOffset = 0;
         set_bkg_data(0, 49, FantasyTileset);
         set_bkg_tiles(0, 0, 32, 18, MapLevel6_32x18);
         currentMap = MapLevel6_32x18;
@@ -429,6 +448,9 @@ void change_map(UINT8 mapId)
     fadeout(5);
     load_map(mapId);
     fadein(5);
+
+    xOffset = 0;
+    yOffset = 0;
 }
 
 UINT8 get_tile_x(UINT8 x){
@@ -451,32 +473,63 @@ BOOLEAN has_collision(UINT8 tile_x, UINT8 tile_y){
 // Function for falling
 void fall()
 {
-    if(fall_counter != 3) { //don't apply gravity every third frame. essentialy making it 2/3*g
-        currentSpeedY = currentSpeedY + gravity/2;
-        ++fall_counter;
-    } else
-        fall_counter = 0;
-        
+    if (!flipped){
+        if(fall_counter != 3) { //don't apply gravity every third frame. essentialy making it 2/3*g
+            currentSpeedY = currentSpeedY + gravity/2;
+            ++fall_counter;
+        } else
+            fall_counter = 0;
+            
 
-    if (currentSpeedY < -7 * (-gravity/3))
-        currentSpeedY = -7 * (-gravity/3);
+        if (currentSpeedY < -7)
+            currentSpeedY = -7;
 
-    player.y = player.y - currentSpeedY;
+        player.y = player.y - currentSpeedY;
 
-    //collision down
-    if(has_collision(get_tile_x(player.x), get_tile_y(player.y)+2u) || has_collision(get_tile_x(player.x)+1u, get_tile_y(player.y)+2u)){ 
-        player.y = (get_tile_y(player.y)+2u)*8u - 16u + 16u;//last 16u is for coordinate offset
-        airborne = 0u;
-        currentSpeedY = 0u;
-        fall_counter = 0u;
+        //collision down
+        if(has_collision(get_tile_x(player.x), get_tile_y(player.y)+2u) || has_collision(get_tile_x(player.x)+1u, get_tile_y(player.y)+2u)){ 
+            player.y = (get_tile_y(player.y)+2u)*8u - 16u + 16u;//last 16u is for coordinate offset
+            airborne = 0u;
+            currentSpeedY = 0u;
+            fall_counter = 0u;
+        }
+
+
+        //collision up
+        if(has_collision(get_tile_x(player.x), get_tile_y(player.y)) || has_collision(get_tile_x(player.x)+1u, get_tile_y(player.y))){ 
+            player.y = get_tile_y(player.y)*8u +8u + 16u;//last 16u is for coordinate offset
+            if(currentSpeedY < 0)
+                currentSpeedY = 0;
+        }
     }
+    else{
+        if(fall_counter != 3) {
+            currentSpeedY = currentSpeedY - gravity/2;
+            ++fall_counter;
+        } else
+            fall_counter = 0;
+            
+
+        if (currentSpeedY > 7)
+            currentSpeedY = 7;
+
+        player.y = player.y - currentSpeedY;
+
+        //collision down
+        if(has_collision(get_tile_x(player.x), get_tile_y(player.y)+2u) || has_collision(get_tile_x(player.x)+1u, get_tile_y(player.y)+2u)){ 
+            player.y = (get_tile_y(player.y)+2u)*8u - 16u + 16u;//last 16u is for coordinate offset
+            if(currentSpeedY < 0)
+                currentSpeedY = 0;
+        }
 
 
-    //collision up
-    if(has_collision(get_tile_x(player.x), get_tile_y(player.y)) || has_collision(get_tile_x(player.x)+1u, get_tile_y(player.y))){ 
-        player.y = get_tile_y(player.y)*8u +8u + 16u;//last 16u is for coordinate offset
-        if(currentSpeedY < 0)
+        //collision up
+        if(has_collision(get_tile_x(player.x), get_tile_y(player.y)) || has_collision(get_tile_x(player.x)+1u, get_tile_y(player.y))){ 
+            player.y = get_tile_y(player.y)*8u +8u + 16u;//last 16u is for coordinate offset
+            airborne = 0u;
             currentSpeedY = 0;
+            fall_counter = 0u;
+        }
     }
 }
 
@@ -486,7 +539,7 @@ void jump()
     if(airborne==0)
     {
         airborne=1;
-        currentSpeedY = 7 * (-gravity/3);
+        currentSpeedY=flipped?-8:7;
         NR10_REG = 0x44;
         NR11_REG = 0x81;
         NR12_REG = 0x41;
@@ -505,7 +558,7 @@ void setup_player()
     player.width = 8;
     xOffset = 0;
     yOffset = 0;
-    player.animationLength = 2;
+    player.animationLength = 1;
     player.animationType = 0; // idle
     player.animationStep = 0;
     player.spriteids[0] = 0;
@@ -515,6 +568,7 @@ void setup_player()
     set_sprite_tile(player.spriteids[0], player.spritenos[0]);
     set_sprite_tile(player.spriteids[1], player.spritenos[1]);
     airborne = 0;
+    facing = 1;
 }
 
 // Function to setup game
@@ -529,6 +583,7 @@ void setup_game()
     advanceAnimation = 0;
     fall_counter = 0;
     loaded = FALSE;
+    flipped = FALSE;
 
     NR52_REG = 0x80;
     NR50_REG = 0x77;
@@ -542,6 +597,7 @@ int main()
 {
     setup_game();
     move_player(8, 96);
+    BOOLEAN idle = TRUE;
     while(gameRunning)
     {
         UINT16 oldx = player.x;
@@ -558,22 +614,32 @@ int main()
             if(has_collision(get_tile_x(player.x), get_tile_y(player.y)) || has_collision(get_tile_x(player.x), get_tile_y(player.y)+1u)){
                 player.x += 1;
             }
-            if (facing != 0)
+            if (facing == 0 || idle)
             {
-                facing = 0;
+                facing = 1;
                 change_player_animation(2);
             }
+            idle = FALSE;
+
         }
         if(j & J_RIGHT) {
             player.x += 1;
             if(has_collision(get_tile_x(player.x)+1u, get_tile_y(player.y)) || has_collision(get_tile_x(player.x)+1u, get_tile_y(player.y)+1u)){
                 player.x -=1;
             }
-            if (facing != 1)
+            if (facing == 1 || idle)
             {
-                facing = 1;
+                facing = 0;
                 change_player_animation(3);
             }
+            idle = FALSE;
+        }
+
+
+        //check if need to switch to idel animation
+        if(!(j & J_LEFT) && !(j & J_RIGHT) && !idle){
+            change_player_animation(facing?0:1);
+            idle = TRUE;
         }
 
         fall();
@@ -610,44 +676,37 @@ int main()
             move_player(8,24);
         }
 
-        //if(currentMap == MapLevel1_2 && player.x+xOffset > 15+xOffset && player.y == 14+yOffset) // FIXME: Michal: fix map change here
+        if(currentMap == MapLevel1_2 && get_tile_x(player.x) == 32 && get_tile_y(player.y) == 11){
         // We have to basically create a sprite at this location that when touched will move the player back and then change its sprite to the gameboy
         // if you get it to work when the player walks into the spot shown in the discord picture of th emap in #fileuploads i will do the sprite work
         // 
-        if(j & J_START) // Debug
-        {
-            /*
-            //TODO: Michal: Fix upside down gravity
             change_map(21);
-            move_player(8,36);
-            gravity = 3;
-            */
-           // then delete this and uncomment the top commands
-           change_map(31);
-           move_player(8,136);
+            move_player(0u*8u+8u,1u*8u+16u);
+            flipped = TRUE;
         }
         //TODO: Sam, tweak numbers if necessary
         if (currentMap == MapLevel2_1 && player.x > 160 && player.y > 110)
         {
             change_map(22);
-            move_player(8, 136);
+            move_player(0u*8u+8u, 15u*8u+16u);
         }
 
-        if (currentMap == MapLevel2_2 && player.x == 22 * 8 +8 && player.y == 4 * 8 + 16) // TODO: Sam, rework to sprite collision, same as 1_2
-        {
-            gravity = -3;
+        //CHECK IF NEED TO FLIP GRAVITY BACK
+        if(currentMap == MapLevel2_2 && get_tile_x(player.x) == 22 && get_tile_y(player.y) == 5){
+            flipped = FALSE;
         }
-        if (currentMap == MapLevel2_2 && player.x > 160 && player.y < 70)
-        {
+        
+        if(currentMap == MapLevel2_2 && get_tile_x(player.x) == 38 && get_tile_y(player.y) == 2){
             change_map(31);
-            move_player(8,136);
+            move_player(1u*8u+8u,15u*8u+16u);
         }
+
         if (currentMap == MapLevel3_1 && player.x > 160 && player.y < 70)
         {
             change_map(32);
             move_player(8, player.y);
         }
-        if (currentMap == MapLevel3_2 && player.x > 160 && player.y < 50)
+        if (currentMap == MapLevel3_2 && get_tile_x(player.x) == 28 && get_tile_y(player.y) == 4)
         {
             // TODO: Sam, maybe add something here? currently the game is won by pressing the A button
             change_map(5);
@@ -656,7 +715,7 @@ int main()
         if(currentMap == MapLevel5_20x18 && (j & J_A))
         {
             change_map(6);
-            move_player(15 * 8 +8, 13 * 8 + 16);
+            move_player(15u * 8u +8u, 13u * 8u + 16u);
             // Game is over at this point
         }
         
