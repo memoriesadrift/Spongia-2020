@@ -314,7 +314,7 @@ void load_map(UINT8 mapId)
     case 11:
         // level 1-1
         scroll_bkg(-xOffset,0);
-        set_bkg_data(0, 49, FantasyTileset);
+        set_bkg_data(0, 50, FantasyTileset);
         set_bkg_tiles(0, 0, 40, 18, MapLevel1_1);
         currentMap = MapLevel1_1;
         currentTileSet = FantasyTileset;
@@ -325,7 +325,7 @@ void load_map(UINT8 mapId)
     case 12:
         // level 1-2
         scroll_bkg(-xOffset,0);
-        set_bkg_data(0, 49, FantasyTileset);
+        set_bkg_data(0, 50, FantasyTileset);
         set_bkg_tiles(0, 0, 40, 18, MapLevel1_2);
         currentMap = MapLevel1_2;
         currentTileSet = FantasyTileset;
@@ -391,7 +391,7 @@ void load_map(UINT8 mapId)
     case 6:
         // level 6
         scroll_bkg(-xOffset,0);
-        set_bkg_data(0, 49, FantasyTileset);
+        set_bkg_data(0, 50, FantasyTileset);
         set_bkg_tiles(0, 0, 32, 18, MapLevel6_32x18);
         currentMap = MapLevel6_32x18;
         currentTileSet = FantasyTileset;
@@ -686,7 +686,7 @@ int main()
             flipped = FALSE;
         }
         
-        if(currentMap == MapLevel2_2 && get_tile_x(player.x) == 38 && get_tile_y(player.y) == 2){
+        if(currentMap == MapLevel2_2 && get_tile_x(player.x) == 32+5 && get_tile_y(player.y) == 3){
             change_map(31);
             move_player(1u*8u+8u,15u*8u+16u);
         }
