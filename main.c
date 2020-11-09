@@ -13,7 +13,7 @@
 // Graphics
 // Sprites
 #include "gfx/playerSprites.c"
-//#include "gfx/Monster1.c"
+#include "gfx/Monster.c"
 // Tiles
 #include "gfx/FantasyTileset.c"
 #include "gfx/MotherboardTileset.c"
@@ -68,7 +68,6 @@ BYTE airborne;
 INT8 gravity;
 INT16 currentSpeedY;
 UBYTE fall_counter;
-
 
 //fucntion declarations
 
@@ -307,7 +306,6 @@ void advance_player_animation()
         player.spritenos[0] += 2u;
         player.spritenos[1] += 2u;
     }
-    
     set_sprite_tile(player.spriteids[0], player.spritenos[0]);
     set_sprite_tile(player.spriteids[1], player.spritenos[1]);
 }
@@ -320,7 +318,7 @@ void load_map(UINT8 mapId)
     case 11:
         // level 1-1
         scroll_bkg(-xOffset,0);
-        set_bkg_data(0, 46, FantasyTileset);
+        set_bkg_data(0, 49, FantasyTileset);
         set_bkg_tiles(0, 0, 40, 18, MapLevel1_1);
         currentMap = MapLevel1_1;
         currentTileSet = FantasyTileset;
@@ -331,7 +329,7 @@ void load_map(UINT8 mapId)
     case 12:
         // level 1-2
         scroll_bkg(-xOffset,0);
-        set_bkg_data(0, 46, FantasyTileset);
+        set_bkg_data(0, 49, FantasyTileset);
         set_bkg_tiles(0, 0, 40, 18, MapLevel1_2);
         currentMap = MapLevel1_2;
         currentTileSet = FantasyTileset;
@@ -342,7 +340,7 @@ void load_map(UINT8 mapId)
     case 21:
         // level 21
         scroll_bkg(-xOffset,0);
-        set_bkg_data(0, 49, MotherboardTileset);
+        set_bkg_data(0, 53, MotherboardTileset);
         set_bkg_tiles(0, 0, 40, 18, MapLevel2_1);
         currentMap = MapLevel2_1;
         currentTileSet = MotherboardTileset;
@@ -353,7 +351,7 @@ void load_map(UINT8 mapId)
     case 22:
         // level 21
         scroll_bkg(-xOffset,0);
-        set_bkg_data(0, 49, MotherboardTileset);
+        set_bkg_data(0, 53, MotherboardTileset);
         set_bkg_tiles(0, 0, 40, 18, MapLevel2_2);
         currentMap = MapLevel2_2;
         currentTileSet = MotherboardTileset;
@@ -364,7 +362,7 @@ void load_map(UINT8 mapId)
     case 31:
         // level 21
         scroll_bkg(-xOffset,0);
-        set_bkg_data(0, 49, MotherboardTileset);
+        set_bkg_data(0, 53, MotherboardTileset);
         set_bkg_tiles(0, 0, 40, 18, MapLevel3_1);
         currentMap = MapLevel3_1;
         currentTileSet = MotherboardTileset;
@@ -375,7 +373,7 @@ void load_map(UINT8 mapId)
     case 32:
         // level 21
         scroll_bkg(-xOffset,0);
-        set_bkg_data(0, 49, MotherboardTileset);
+        set_bkg_data(0, 53, MotherboardTileset);
         set_bkg_tiles(0, 0, 40, 18, MapLevel3_2);
         currentMap = MapLevel3_2;
         currentTileSet = MotherboardTileset;
@@ -386,7 +384,7 @@ void load_map(UINT8 mapId)
     case 5:
         // level 5
         scroll_bkg(-xOffset,0);
-        set_bkg_data(0, 49, MotherboardTileset);
+        set_bkg_data(0, 53, MotherboardTileset);
         set_bkg_tiles(0, 0, 20, 18, MapLevel5_20x18);
         currentMap = MapLevel5_20x18;
         currentTileSet = MotherboardTileset;
@@ -469,7 +467,6 @@ BOOLEAN has_collision(UINT8 tile_x, UINT8 tile_y){
     return FALSE;
 }
 
-//TODO: Michal: Fix upside down gravity, test on levels 2_1 and 2_2, commands: change_map(21) and 22
 // Function for falling
 void fall()
 {
@@ -553,7 +550,7 @@ void jump()
 
 void setup_player()
 {
-    set_sprite_data(0, 31, playerSprites);
+    set_sprite_data(0, 12, playerSprites);
     player.height = 16;
     player.width = 8;
     xOffset = 0;
@@ -577,6 +574,7 @@ void setup_player()
 void setup_game()
 {
     setup_player();
+    setup_monster();
     load_map(11);   
     gravity = -3;
     gameRunning = 1;
@@ -684,7 +682,7 @@ int main()
             move_player(0u*8u+8u,1u*8u+16u);
             flipped = TRUE;
         }
-        //TODO: Sam, tweak numbers if necessary
+        
         if (currentMap == MapLevel2_1 && player.x > 160 && player.y > 110)
         {
             change_map(22);
@@ -708,12 +706,13 @@ int main()
         }
         if (currentMap == MapLevel3_2 && get_tile_x(player.x) == 28 && get_tile_y(player.y) == 4)
         {
-            // TODO: Sam, maybe add something here? currently the game is won by pressing the A button
+           HIDE_SPRITES;
             change_map(5);
             move_player(48,114);
         }
         if(currentMap == MapLevel5_20x18 && (j & J_A))
         {
+            SHOW_SPRITES;
             change_map(6);
             move_player(15u * 8u +8u, 13u * 8u + 16u);
             // Game is over at this point
