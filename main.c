@@ -570,7 +570,6 @@ void setup_player()
 void setup_game()
 {
     setup_player();
-    setup_monster();
     load_map(11);   
     gravity = -3;
     gameRunning = 1;
