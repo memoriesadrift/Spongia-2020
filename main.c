@@ -11,7 +11,6 @@
 // Graphics
 // Sprites
 #include "gfx/playerSprites.c"
-#include "gfx/Monster.c"
 // Tiles
 #include "gfx/FantasyTileset.c"
 #include "gfx/MotherboardTileset.c"
