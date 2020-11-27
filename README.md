@@ -10,3 +10,6 @@ You'll have to enter the guts of the gameboy and eradicate the virus infecting t
 
 ## Controls
 D-Pad to move, A to Jump
+
+## The team:
+Graphics by @marymtjv on Instagram
